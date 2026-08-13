@@ -5,12 +5,33 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  {
+    ignores: [
+      'dist/**',
+      'build/**',
+      'coverage/**',
+      'node_modules/**',
+      '.vite/**',
+      '.github/**',
+      'uploads/**',
+      '**/*.sdb',
+      '**/*.sdb-journal',
+      '**/*.sdb-wal',
+      '**/*.sdb-shm',
+      '**/*.sqlite',
+      '**/*.sqlite3',
+      '**/*.db',
+      'tests/migrate-*.cjs',
+      'deploy.sh',
+      '*.config.{js,ts,mjs,cjs}',
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
+    ignores: ['api/**'],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 2022,
       globals: globals.browser,
     },
     plugins: {
@@ -24,5 +45,14 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
     },
+  },
+  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ['api/**/*.{ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: { ...globals.nodeBuiltin, ...globals.node },
+    },
+    rules: {},
   },
 )
