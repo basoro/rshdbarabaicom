@@ -33,25 +33,33 @@ app.use('/api/admin', adminRoutes)
 /**
  * health
  */
-app.use(
-  '/api/health',
-  (_req: Request, res: Response, _next: NextFunction): void => {
-    res.status(200).json({
-      success: true,
-      message: 'ok',
-    })
-  },
-)
+app.use('/api/health', (req: Request, res: Response): void => {
+  void req;
+  res.status(200).json({
+    success: true,
+    message: 'ok',
+  })
+})
 
 /**
  * error handler middleware
  */
-app.use((_error: Error, _req: Request, res: Response, _next: NextFunction) => {
-  res.status(500).json({
-    success: false,
-    error: 'Server internal error',
-  })
-})
+app.use(
+  (
+    error: Error,
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): void => {
+    void error;
+    void req;
+    void next;
+    res.status(500).json({
+      success: false,
+      error: 'Server internal error',
+    })
+  },
+)
 
 /**
  * 404 handler

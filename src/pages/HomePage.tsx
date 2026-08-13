@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CalendarDays, Phone, PlayCircle } from 'lucide-react';
 import SectionHeading from '@/components/SectionHeading';
@@ -14,7 +14,7 @@ const featuredServiceIcons: Record<string, string> = {
 
 export default function HomePage() {
   const bootstrap = useSiteStore((state) => state.bootstrap);
-  const slides = bootstrap?.heroSlides ?? [];
+  const slides = useMemo(() => bootstrap?.heroSlides ?? [], [bootstrap?.heroSlides]);
   const [activeSlide, setActiveSlide] = useState(0);
   const doctorSliderRef = useRef<HTMLDivElement | null>(null);
   const aboutImage = 'https://www.rshdbarabai.com/themes/rshd/assets/img/about/about-02.jpg';

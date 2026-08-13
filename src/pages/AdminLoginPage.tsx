@@ -16,8 +16,8 @@ export default function AdminLoginPage() {
       await adminStore.login(username, password);
       const destination = (location.state as { from?: string } | undefined)?.from || '/admin';
       navigate(destination, { replace: true });
-    } catch (_error) {
-      // error sudah ditangani store
+    } catch (error) {
+      void error;
     }
   }
 
