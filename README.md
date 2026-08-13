@@ -27,7 +27,11 @@ Website resmi Rumah Sakit Umum Daerah H. Damanhuri Barabai, Kabupaten Hulu Sunga
    - [6.4. Menjalankan dengan PM2](#64-menjalankan-dengan-pm2)
    - [6.5. Reverse Proxy (Nginx / HTTPS)](#65-reverse-proxy-nginx--https)
 7. [Verifikasi Setelah Deploy](#7-verifikasi-setelah-deploy)
-8. [Troubleshooting](#8-troubleshooting)
+8. [CI/CD](#8-cicd)
+   - [8.1. GitHub Actions CI (lint · typecheck · build)](#81-github-actions-ci-lint--typecheck--build)
+   - [8.2. Deploy ke Production dengan `deploy.sh`](#82-deploy-ke-production-dengan-deploysh)
+   - [8.3. Masa Depan: Deploy via GitHub Actions (Opsional)](#83-masa-depan-deploy-via-github-actions-opsional)
+9. [Troubleshooting](#9-troubleshooting)
 
 ---
 
@@ -405,11 +409,104 @@ curl -sS https://rshdbarabai.com/api/public/bootstrap | python3 -m json.tool | g
 #    - https://rshdbarabai.com/admin/login -> login CMS admin lalu buka /admin/news
 ```
 
-Jika salah satu poin di atas gagal, lihat [Troubleshooting](#8-troubleshooting).
+Jika salah satu poin di atas gagal, lihat [Troubleshooting](#9-troubleshooting).
 
 ---
 
-## 8. Troubleshooting
+## 8. CI/CD
+
+### 8.1. GitHub Actions CI (lint · typecheck · build)
+
+Setiap **push ke `main`** atau **pull request ke `main`** akan menjalankan workflow `.github/workflows/ci.yml` untuk memastikan:
+
+1. `npm ci` install dependencies
+2. `npm run check` — `tsc --noEmit` (type safety seluruh kode TS)
+3. `npm run lint` — ESLint
+4. `npm run build` — build React ke `dist/` (di tiap push ke `main`, hasil `dist/` di-upload sebagai artifact selama 7 hari untuk debugging cepat)
+
+File workflow: [.github/workflows/ci.yml](.github/workflows/ci.yml#L1-L55)
+
+Contoh hasil di GitHub:
+- Tab **Actions** repo → pilih workflow **CI** → muncul job `Lint · Typecheck · Build`
+- Jika gagal: klik job, expand step yang merah untuk error message (biasanya karena ada TS error type baru / lint).
+
+### 8.2. Deploy ke Production dengan `deploy.sh`
+
+Tersedia skrip deploy [deploy.sh](deploy.sh#L1-L239) untuk deploy dari **lokal** ke server production via **rsync + SSH + PM2 reload zero-downtime**.
+
+#### Keunggulan skrip ini:
+- `rsync --delete-after` — sync file dengan cepat, hanya file berubah yang di-transfer.
+- **JANGAN timpa** `.env`, `api/database.sdb`, `database.sdb`, `uploads/`, `node_modules/`, `dist/` di server (semua sudah di-exclude default).
+- Preflight check di server: `node ... import('./api/app.js')` — jika ada syntax error / import error, deploy **BATAL** (PM2 tidak direload → app lama tetap jalan).
+- Setelah sync, jalankan `npm ci --omit=dev` + `npm run build` di server.
+- Akhiri dengan `pm2 reload` (zero-downtime) dan health check public opsional via `DEPLOY_PUBLIC_URL`.
+
+#### Cara pakai `deploy.sh`
+
+**1) Setting variable (bisa taruh di `~/.zshrc` / `~/.bashrc` atau export manual):**
+
+```bash
+export DEPLOY_USER=root                 # atau username SSH di server
+export DEPLOY_HOST=rshdbarabai.com      # atau IP server
+export DEPLOY_PATH=/var/www/rshdbarabai.com
+export DEPLOY_PORT=22                   # (default 22, ganti jika SSH port custom)
+export DEPLOY_APP_NAME=rshdbarabaicom   # sesuai app name di ecosystem.config.cjs
+export DEPLOY_PUBLIC_URL=https://rshdbarabai.com   # opsional, untuk auto /api/health check
+```
+
+**2) Jalankan deploy (dari lokal folder project):**
+
+```bash
+# DRY RUN (lihat file yang akan di-sync tanpa benar-benar menulis ke server)
+DRY_RUN=1 ./deploy.sh
+
+# DEPLOY SESUNGGUHNYA
+./deploy.sh
+
+# Atau deploy ke host tertentu (override DEPLOY_HOST)
+./deploy.sh 203.xxx.xxx.xxx
+```
+
+Output alur deploy:
+```
+1/5 ▶︎ Memastikan remote path ada...
+2/5 ▶︎ Sync source code via rsync...
+3/5 ▶︎ Install dependencies production + build frontend di server...
+4/5 ▶︎ Health check local app loader + PM2 reload (zero-downtime)...
+5/5 ▶︎ Final health check via local HTTP...
+🎉 Deploy selesai.
+```
+
+#### Jika rollback diperlukan
+
+- Jika app baru error di server: **PM2 reload otomatis rollback** ketika health check internal gagal (catatan: butuh `pm2 reload` + `--listen-timeout` / config health check jika mau diaktifkan).
+- Jika ingin rollback manual ke app state sebelumnya:
+  ```bash
+  ssh root@rshdbarabai.com
+  cd /var/www/rshdbarabai.com
+  git reset --hard HEAD~1        # (jika server punya git clone)
+  # ATAU ambil backup rsync sebelumnya (jika anda punya rsync backup target)
+  pm2 reload rshdbarabaicom
+  ```
+- Alternatif: deploy commit lama dari lokal (checkout commit yang stabil → jalankan `./deploy.sh`).
+
+### 8.3. Masa Depan: Deploy via GitHub Actions (Opsional)
+
+Jika nanti mau **push ke `main` → otomatis deploy** tanpa jalankan `./deploy.sh` manual di lokal:
+
+1. Tambahkan **Secrets repo** di GitHub → `Settings → Secrets and variables → Actions → New repository secret`:
+   - `SSH_PRIVATE_KEY` — isi private key (copy isi file `~/.ssh/id_ed25519` atau yang dipakai login server).
+   - `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH`, `DEPLOY_PORT` (opsional juga bisa disimpan sebagai Secret).
+2. Buat workflow `.github/workflows/deploy.yml` yang:
+   - Checkout repo
+   - Setup SSH via `appleboy/ssh-action` / `ssh-key-action`
+   - Jalankan `rsync` / atau SSH ke server dan eksekusi script deploy yang sama.
+
+Kami sarankan mulai dengan **`deploy.sh` dulu** (paling aman: tidak expose creds ke Actions sampai yakin flow production stabil).
+
+---
+
+## 9. Troubleshooting
 
 ### Q: Berita tidak muncul di publik / halaman `/news` kosong?
 1. Cek jumlah baris di DB aktif:
