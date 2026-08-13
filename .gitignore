@@ -1,0 +1,59 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies & build artifacts
+node_modules
+dist
+dist-ssr
+build
+.vite
+
+# Environment & local-only files
+.env
+.env.local
+.env.production.local
+.env.development.local
+*.local
+
+# Uploaded media & documents
+uploads/
+
+# SQLite databases (konten asli jangan di-commit ke repo private)
+*.sqlite
+*.sqlite3
+*.db
+*.sdb
+api/database.sdb
+database.sdb
+*.sdb-journal
+*.sdb-wal
+*.sdb-shm
+*.sqlite-shm
+*.sqlite-wal
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temp / sandbox scripts
+.tmp-*
+tmp/
+temp/
+
+# PM2
+.pm2/
+*.pid
+*.seed

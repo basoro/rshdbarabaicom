@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    font-family: 'Source Sans 3', sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #f8fafc;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background:
+      radial-gradient(circle at top, rgba(16, 185, 129, 0.08), transparent 22%),
+      #f8fafc;
+    color: #0f172a;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
+
+@layer components {
+  .container {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .font-display {
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: -0.02em;
+  }
+
+  .rich-html {
+    @apply text-base leading-8 text-slate-700;
+  }
+
+  .rich-html h1,
+  .rich-html h2,
+  .rich-html h3,
+  .rich-html h4 {
+    @apply mt-8 font-display text-slate-900;
+  }
+
+  .rich-html p,
+  .rich-html ul,
+  .rich-html ol,
+  .rich-html table,
+  .rich-html blockquote,
+  .rich-html iframe {
+    @apply my-4 max-w-full;
+  }
+
+  .rich-html a {
+    @apply font-semibold text-emerald-700;
+  }
+
+  .rich-html img {
+    @apply my-6 h-auto max-w-full rounded-[1.5rem];
+  }
+
+  .rich-html table {
+    @apply w-full border-collapse overflow-hidden rounded-2xl;
+  }
+
+  .rich-html th,
+  .rich-html td {
+    @apply border border-slate-200 px-4 py-3 text-left;
+  }
+}
