@@ -78,6 +78,7 @@ export type NewsItem = {
   status: number;
   comments: number;
   markdown: number;
+  views: number;
   published_at: number;
   updated_at: number;
   created_at: number;

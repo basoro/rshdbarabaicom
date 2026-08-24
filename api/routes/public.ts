@@ -1,3 +1,6 @@
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { Router, type Request, type Response } from 'express';
 import {
   featuredServices,
@@ -9,7 +12,7 @@ import {
   resolveNewsCover,
   SITE_ORIGIN,
 } from '../lib/content.js';
-import { all, get, getSettingsMap } from '../lib/database.js';
+import { all, get, getSettingsMap, run } from '../lib/database.js';
 import { getFeaturedDoctors } from '../lib/mysql.js';
 
 type NewsRow = {
@@ -20,6 +23,9 @@ type NewsRow = {
   content: string;
   cover_photo: string | null;
   status: number;
+  comments: number;
+  markdown: number;
+  views: number;
   published_at: number;
   updated_at: number;
   created_at: number;
@@ -48,6 +54,10 @@ type ArchiveRow = {
   created_at: string;
 };
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadsRoot = path.resolve(__dirname, '../../uploads');
+
 const router = Router();
 const PUBLIC_NEWS_STATUS = 2;
 const imageFallbackUrl =
@@ -64,6 +74,20 @@ function mapNews(row: NewsRow) {
     },
   };
 }
+
+router.get('/media/local/:target/:filename', (req: Request, res: Response) => {
+  const target = req.params.target.replace(/[^a-z0-9-_]+/gi, '').toLowerCase();
+  const filename = path.basename(req.params.filename);
+  const filePath = path.join(uploadsRoot, target, filename);
+
+  if (!fs.existsSync(filePath)) {
+    res.redirect(imageFallbackUrl);
+    return;
+  }
+
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(filePath);
+});
 
 router.get('/media/news/:filename', async (req: Request, res: Response) => {
   const response = await fetch(
@@ -367,6 +391,59 @@ router.get('/arsip', (req: Request, res: Response) => {
         totalPages: Math.max(Math.ceil(total / pageSize), 1),
       },
     },
+  });
+});
+
+// IP-based rate limit: one view per news per 30 minutes
+const viewRateLimit = new Map<string, number>();
+const VIEW_RATE_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
+
+// Cleanup old entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of viewRateLimit) {
+    if (now - timestamp > VIEW_RATE_LIMIT_MS) {
+      viewRateLimit.delete(key);
+    }
+  }
+}, 5 * 60 * 1000);
+
+router.post('/news/:slug/view', (req: Request, res: Response) => {
+  const slug = req.params.slug;
+  const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+  const rateLimitKey = `${ip}:${slug}`;
+  const now = Date.now();
+
+  const lastView = viewRateLimit.get(rateLimitKey);
+  if (lastView && now - lastView < VIEW_RATE_LIMIT_MS) {
+    // Rate limited — return current views without incrementing
+    const row = get<NewsRow>(
+      `SELECT views FROM mlite_news WHERE slug = ? AND status = ? LIMIT 1`,
+      [slug, PUBLIC_NEWS_STATUS],
+    );
+    res.json({
+      success: true,
+      data: { views: row?.views ?? 0 },
+    });
+    return;
+  }
+
+  // Increment views using atomic SQL
+  run(
+    `UPDATE mlite_news SET views = views + 1 WHERE slug = ? AND status = ?`,
+    [slug, PUBLIC_NEWS_STATUS],
+  );
+
+  viewRateLimit.set(rateLimitKey, now);
+
+  const row = get<NewsRow>(
+    `SELECT views FROM mlite_news WHERE slug = ? AND status = ? LIMIT 1`,
+    [slug, PUBLIC_NEWS_STATUS],
+  );
+
+  res.json({
+    success: true,
+    data: { views: row?.views ?? 0 },
   });
 });
 

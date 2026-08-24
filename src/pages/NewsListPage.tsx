@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CalendarDays, ArrowRight } from 'lucide-react';
+import { CalendarDays, ArrowRight, Eye } from 'lucide-react';
 import SectionHeading from '@/components/SectionHeading';
 import { getNewsList } from '@/lib/api';
 import { formatDate, truncateHtml } from '@/lib/format';
@@ -39,9 +39,15 @@ export default function NewsListPage() {
             <article key={article.id} className="overflow-hidden rounded-[2rem] bg-white shadow-lg shadow-slate-200/50">
               <img src={article.cover_url} alt={article.title} className="h-64 w-full object-cover" />
               <div className="p-7">
-                <div className="flex items-center gap-2 text-sm text-slate-500">
-                  <CalendarDays className="h-4 w-4 text-emerald-700" />
-                  {formatDate(article.published_at)}
+                <div className="flex items-center gap-3 text-sm text-slate-500">
+                  <span className="inline-flex items-center gap-1.5">
+                    <CalendarDays className="h-4 w-4 text-emerald-700" />
+                    {formatDate(article.published_at)}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Eye className="h-4 w-4 text-emerald-700" />
+                    {(article.views ?? 0).toLocaleString('id-ID')} dibaca
+                  </span>
                 </div>
                 <h3 className="mt-4 font-display text-3xl leading-tight text-slate-900">{article.title}</h3>
                 <p className="mt-4 text-sm leading-7 text-slate-600">

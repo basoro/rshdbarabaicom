@@ -87,7 +87,6 @@ export function resolveNewsCover(coverPhoto: string | null | undefined): string 
   }
 
   const imageUrl = getEnvImageUrl();
-  const imagePath = getEnvImagePath();
   const suffix = trimmed.replace(/^\/+/, '');
 
   if (trimmed.startsWith('/')) {
@@ -95,15 +94,9 @@ export function resolveNewsCover(coverPhoto: string | null | undefined): string 
     return imageUrl ? `${imageUrl}/${encoded}` : trimmed;
   }
 
-  const pathSuffix = percentEncode(suffix, true);
-  const fullPath = joinUrlParts(imagePath ? [imagePath, pathSuffix] : [pathSuffix]);
-
-  if (imageUrl) {
-    return `${imageUrl}/${fullPath}`;
-  }
-
-  const proxySuffix = percentEncode(trimmed.replace(/^\/+/, ''));
-  return `/api/public/media/news/${proxySuffix}`;
+  // Bare filename → always route to local media server
+  const proxySuffix = percentEncode(trimmed);
+  return `/api/public/media/local/news/${proxySuffix}`;
 }
 
 export function resolvePreviewCoverFromEnv(): { imageUrl: string; imagePath: string; fallbackUrl: string } {

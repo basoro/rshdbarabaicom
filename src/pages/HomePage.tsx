@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, CalendarDays, Phone, PlayCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarDays, Eye, Phone, PlayCircle } from 'lucide-react';
 import SectionHeading from '@/components/SectionHeading';
 import { formatDate, truncateHtml } from '@/lib/format';
 import { useSiteStore } from '@/store/siteStore';
@@ -241,25 +241,27 @@ export default function HomePage() {
             <Link
               key={service.slug}
               to={`/${service.slug}`}
-              className="group relative overflow-hidden rounded-[1.8rem] border border-slate-100 bg-white p-7 shadow-sm shadow-slate-200/40 transition hover:-translate-y-1 hover:shadow-lg"
+              className="group relative flex h-full flex-col items-center text-center overflow-hidden rounded-[1.8rem] border border-slate-100 bg-white p-7 shadow-sm shadow-slate-200/40 transition hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="absolute right-0 top-0 h-28 w-28 rounded-full bg-[#eef8f3]" />
               {featuredServiceIcons[service.slug] ? (
-                <div className="relative inline-flex h-20 w-20 items-center justify-center rounded-[1.6rem] bg-[#f4fbf7] ring-1 ring-emerald-100">
+                <div className="relative mt-4 inline-flex h-20 w-20 items-center justify-center rounded-[1.6rem] bg-[#f4fbf7] ring-1 ring-emerald-100">
+                  <div className="absolute left-1/2 top-[52%] h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#eef8f3]" aria-hidden />
                   <img
                     src={featuredServiceIcons[service.slug]}
                     alt={service.title}
-                    className="h-12 w-12 object-contain"
+                    className="relative z-10 h-12 w-12 object-contain"
                   />
                 </div>
               ) : null}
-              <p className="text-xs font-bold uppercase tracking-[0.35em] text-emerald-700">Layanan</p>
-              <h3 className="relative mt-4 font-display text-[1.85rem] font-semibold text-slate-900">{service.title}</h3>
-              <p className="mt-4 text-sm leading-7 text-slate-600">{service.description}</p>
-              <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#fff3f8] px-4 py-2 text-sm font-semibold text-[#b73567]">
-                Selengkapnya
-                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-              </span>
+              <p className="mt-12 text-xs font-bold uppercase tracking-[0.35em] text-emerald-700">Layanan</p>
+              <h3 className="relative font-display text-[1.85rem] font-semibold text-slate-900">{service.title}</h3>
+              <p className="mt-2 text-sm leading-7 text-slate-600">{service.description}</p>
+              <div className="mt-auto pt-6">
+                <span className="inline-flex items-center gap-2 rounded-full bg-[#fff3f8] px-4 py-2 text-sm font-semibold text-[#b73567]">
+                  Selengkapnya
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                </span>
+              </div>
             </Link>
           ))}
         </div>
@@ -290,38 +292,46 @@ export default function HomePage() {
         </div>
         <div
           ref={doctorSliderRef}
-          className="mt-5 flex gap-5 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="mt-5 flex items-stretch gap-5 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {bootstrap.doctorHighlights.map((doctor) => (
             <div
               key={doctor.code || doctor.name}
               data-doctor-card
-              className="min-w-[280px] max-w-[280px] snap-start overflow-hidden rounded-[1.8rem] border border-slate-100 bg-white shadow-sm shadow-slate-200/40 md:min-w-[300px] md:max-w-[300px]"
+              className="flex h-[540px] min-w-[280px] max-w-[280px] flex-col snap-start overflow-hidden rounded-[1.8rem] border border-slate-100 bg-white shadow-sm shadow-slate-200/40 md:h-[572px] md:min-w-[300px] md:max-w-[300px]"
             >
               <div className="aspect-[4/4.3] overflow-hidden bg-slate-100">
                 <img
                   src={doctor.photo_url || doctorPlaceholder}
                   alt={doctor.name}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover object-[center_15%]"
                   onError={(event) => {
                     event.currentTarget.src = doctorPlaceholder;
                   }}
                 />
               </div>
-              <div className="p-6">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-700">
+              <div className="flex flex-1 flex-col p-6">
+                <p
+                  title={doctor.specialty}
+                  className="text-[11px] font-bold uppercase leading-snug tracking-[0.28em] text-emerald-700"
+                >
                   {doctor.specialty}
                 </p>
-                <h3 className="mt-3 font-display text-[1.55rem] font-semibold leading-tight text-slate-900">
+                <h3
+                  title={doctor.name}
+                  className="mt-3 line-clamp-3 font-display text-[1.55rem] font-semibold leading-tight text-slate-900"
+                >
                   {doctor.name}
                 </h3>
-                <Link
-                  to="/profil-dokter"
-                  className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#b73567]"
-                >
-                  Lihat Semua Dokter
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+                <div className="mt-auto pt-5">
+                  <Link
+                    to="/profil-dokter"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-[#b73567]"
+                  >
+                    Lihat Semua Dokter
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
               </div>
             </div>
           ))}
@@ -340,9 +350,15 @@ export default function HomePage() {
             <article key={article.id} className="overflow-hidden rounded-[1.8rem] border border-slate-100 bg-white shadow-sm shadow-slate-200/40 transition hover:-translate-y-1 hover:shadow-lg">
               <img src={article.cover_url} alt={article.title} className="h-56 w-full object-cover" />
               <div className="p-7">
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <CalendarDays className="h-4 w-4 text-emerald-700" />
-                  {formatDate(article.published_at)}
+                <div className="flex items-center gap-3 text-xs text-slate-500">
+                  <span className="inline-flex items-center gap-1.5">
+                    <CalendarDays className="h-4 w-4 text-emerald-700" />
+                    {formatDate(article.published_at)}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Eye className="h-4 w-4 text-emerald-700" />
+                    {(article.views ?? 0).toLocaleString('id-ID')} dibaca
+                  </span>
                 </div>
                 <h3 className="mt-4 font-display text-[1.45rem] font-semibold leading-tight text-slate-900">
                   {truncateText(article.title, 30)}

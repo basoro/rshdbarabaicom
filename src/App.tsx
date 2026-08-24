@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import AdminLayout from '@/components/AdminLayout';
 import PublicLayout from '@/components/PublicLayout';
+import ScrollToTop from '@/components/ScrollToTop';
 import AdminArchivesPage from '@/pages/AdminArchivesPage';
 import AdminDashboardPage from '@/pages/AdminDashboardPage';
 import AdminLoginPage from '@/pages/AdminLoginPage';
@@ -18,6 +19,7 @@ import PageContentPage from '@/pages/PageContentPage';
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin" element={<AdminLayout />}>

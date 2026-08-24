@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowRight, CalendarDays, User } from 'lucide-react';
+import { ArrowRight, CalendarDays, Eye, User } from 'lucide-react';
 import RichHtml from '@/components/RichHtml';
 import SectionHeading from '@/components/SectionHeading';
-import { getNewsDetail } from '@/lib/api';
+import { getNewsDetail, incrementNewsViews } from '@/lib/api';
 import { formatDate, truncateHtml } from '@/lib/format';
 import type { NewsItem } from '@/types';
 
@@ -24,6 +24,13 @@ export default function NewsDetailPage() {
       })
       .catch((reason: Error) => setError(reason.message))
       .finally(() => setLoading(false));
+  }, [slug]);
+
+  useEffect(() => {
+    if (!slug) return;
+    incrementNewsViews(slug).then((response) => {
+      setItem((current) => (current ? { ...current, views: response.views } : current));
+    }).catch(() => {});
   }, [slug]);
 
   if (loading) {
@@ -58,6 +65,10 @@ export default function NewsDetailPage() {
             <span className="inline-flex items-center gap-2">
               <User className="h-4 w-4 text-emerald-700" />
               {item.author.name}
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <Eye className="h-4 w-4 text-emerald-700" />
+              {(item.views ?? 0).toLocaleString('id-ID')} dibaca
             </span>
           </div>
           <h1 className="mt-6 font-display text-5xl leading-tight text-slate-900">{item.title}</h1>

@@ -52,6 +52,12 @@ export function getNewsDetail(slug: string) {
   return request<{ item: NewsItem; related: NewsItem[] }>(`/api/public/news/${slug}`);
 }
 
+export function incrementNewsViews(slug: string) {
+  return request<{ views: number }>(`/api/public/news/${slug}/view`, {
+    method: 'POST',
+  });
+}
+
 export function getArchives(params: Record<string, string | number | undefined>) {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {

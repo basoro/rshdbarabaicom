@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Clock3, Menu, Phone, X } from 'lucide-react';
 import type { MenuItem } from '@/types';
@@ -14,39 +14,121 @@ function resolveItemUrl(item: MenuItem): string {
   return '#';
 }
 
+function DropdownItem({ item, parentLabel }: { item: MenuItem; parentLabel: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const closeTimerRef = useRef<number | null>(null);
+  const url = resolveItemUrl(item);
+  const external = url.startsWith('http');
+  const hasChildren = !!item.children?.length;
+  const keyBase = `${parentLabel}-${item.label}`;
+
+  const handleMouseEnter = () => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimerRef.current = window.setTimeout(() => {
+      setIsOpen(false);
+      closeTimerRef.current = null;
+    }, 150);
+  };
+
+  const linkClass =
+    'flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm text-slate-600 transition hover:bg-[#fff3f8] hover:text-[#b73567]';
+
+  if (hasChildren) {
+    return (
+      <div key={keyBase} className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+        {external ? (
+          <a href={url} target="_blank" rel="noreferrer" className={linkClass}>
+            <span>{item.label}</span>
+            <span className="text-sm text-slate-400">›</span>
+          </a>
+        ) : (
+          <NavLink to={url} className={linkClass}>
+            <span>{item.label}</span>
+            <span className="text-sm text-slate-400">›</span>
+          </NavLink>
+        )}
+        <div
+          className={`absolute left-full top-0 z-20 ml-1 min-w-72 rounded-[1.75rem] border border-slate-100 bg-white p-3 shadow-2xl shadow-slate-900/10 transition duration-200 ${
+            isOpen ? 'visible opacity-100 translate-x-0' : 'invisible opacity-0 -translate-x-1 pointer-events-none'
+          }`}
+        >
+          {item.children!.map((grandchild) => (
+            <DropdownItem key={`${keyBase}-${grandchild.label}`} item={grandchild} parentLabel={keyBase} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return external ? (
+    <a
+      key={keyBase}
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className="block rounded-2xl px-4 py-3 text-sm text-slate-600 transition hover:bg-[#fff3f8] hover:text-[#b73567]"
+    >
+      {item.label}
+    </a>
+  ) : (
+    <NavLink
+      key={keyBase}
+      to={url}
+      className="block rounded-2xl px-4 py-3 text-sm text-slate-600 transition hover:bg-[#fff3f8] hover:text-[#b73567]"
+    >
+      {item.label}
+    </NavLink>
+  );
+}
+
 function HeaderMenu({ item }: { item: MenuItem }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const closeTimerRef = useRef<number | null>(null);
+
+  const handleMouseEnter = () => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimerRef.current = window.setTimeout(() => {
+      setIsOpen(false);
+      closeTimerRef.current = null;
+    }, 150);
+  };
+
   if (item.children?.length) {
     return (
-      <div className="group relative">
-        <button className="flex items-center gap-1 px-3 py-3 text-[15px] font-semibold text-slate-700 transition hover:text-[#c74378]">
+      <div className="relative pb-2" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+        <button
+          type="button"
+          className={`inline-flex items-center gap-1 px-3 py-3 text-[15px] font-semibold transition ${
+            isOpen ? 'text-[#c74378]' : 'text-slate-700 hover:text-[#c74378]'
+          }`}
+        >
           {item.label}
-          <span className="text-base leading-none">+</span>
+          <span className={`text-base leading-none transition-transform duration-200 ${isOpen ? 'rotate-45' : ''}`}>
+            +
+          </span>
         </button>
-        <div className="invisible absolute left-0 top-full z-20 mt-2 min-w-72 rounded-[1.75rem] border border-slate-100 bg-white p-3 opacity-0 shadow-2xl shadow-slate-900/10 transition group-hover:visible group-hover:opacity-100">
-          {item.children.map((child) => {
-            const url = resolveItemUrl(child);
-            const external = url.startsWith('http');
-
-            return external ? (
-              <a
-                key={`${item.label}-${child.label}`}
-                href={url}
-                target="_blank"
-                rel="noreferrer"
-                className="block rounded-2xl px-4 py-3 text-sm text-slate-600 transition hover:bg-[#fff3f8] hover:text-[#b73567]"
-              >
-                {child.label}
-              </a>
-            ) : (
-              <NavLink
-                key={`${item.label}-${child.label}`}
-                to={url}
-                className="block rounded-2xl px-4 py-3 text-sm text-slate-600 transition hover:bg-[#fff3f8] hover:text-[#b73567]"
-              >
-                {child.label}
-              </NavLink>
-            );
-          })}
+        <div
+          className={`absolute left-0 top-full z-20 mt-0 min-w-72 rounded-[1.75rem] border border-slate-100 bg-white p-3 shadow-2xl shadow-slate-900/10 transition duration-200 ${
+            isOpen ? 'visible opacity-100 translate-y-0' : 'invisible opacity-0 -translate-y-1 pointer-events-none'
+          }`}
+        >
+          {item.children.map((child) => (
+            <DropdownItem key={`${item.label}-${child.label}`} item={child} parentLabel={item.label} />
+          ))}
         </div>
       </div>
     );
@@ -55,16 +137,20 @@ function HeaderMenu({ item }: { item: MenuItem }) {
   const url = resolveItemUrl(item);
   const external = url.startsWith('http');
   const className =
-    'px-3 py-3 text-[15px] font-semibold text-slate-700 transition hover:text-[#c74378]';
+    'inline-flex items-center px-3 py-3 text-[15px] font-semibold text-slate-700 transition hover:text-[#c74378]';
 
-  return external ? (
-    <a href={url} target="_blank" rel="noreferrer" className={className}>
-      {item.label}
-    </a>
-  ) : (
-    <NavLink to={url} className={className}>
-      {item.label}
-    </NavLink>
+  return (
+    <div className="relative pb-2">
+      {external ? (
+        <a href={url} target="_blank" rel="noreferrer" className={className}>
+          {item.label}
+        </a>
+      ) : (
+        <NavLink to={url} className={className}>
+          {item.label}
+        </NavLink>
+      )}
+    </div>
   );
 }
 
@@ -72,7 +158,7 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 bg-white/96 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur">
+    <header className="sticky top-0 z-40 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
       <div className="border-b border-slate-100 bg-white text-slate-500">
         <div className="container flex flex-wrap items-center justify-between gap-3 py-2 text-[11px] md:text-xs">
           <div className="flex flex-wrap items-center gap-4">
@@ -116,12 +202,12 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
             </p>
             <p className="mt-1 text-sm text-slate-600">08:00 - 11:00 • 14:00 - 16:00</p>
           </div>
-          <Link
+          {/* <Link
             to="/admin/login"
             className="rounded-full border border-slate-200 px-4 py-3 text-xs font-semibold uppercase tracking-[0.24em] text-slate-700 transition hover:border-[#d84f86]/30 hover:text-[#b73567]"
           >
             CMS
-          </Link>
+          </Link> */}
           <a
             href="https://play.google.com/store/apps/details?id=com.rshdbarabai.apam"
             target="_blank"
@@ -139,7 +225,7 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
               <HeaderMenu key={item.label} item={item} />
             ))}
           </nav>
-          <div className="flex items-center gap-2 rounded-full bg-[#fff3f8] px-4 py-2 text-sm text-[#b73567]">
+          <div className="shrink-0 flex items-center gap-2 rounded-full bg-[#fff3f8] px-4 py-2 text-sm text-[#b73567]">
             <Phone className="h-4 w-4" />
             0811-800-5050
           </div>

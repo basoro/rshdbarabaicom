@@ -47,6 +47,13 @@ db.exec(`
   FROM mlite_users
 `);
 
+// Migration: add views column to mlite_news if missing
+try {
+  db.exec(`ALTER TABLE mlite_news ADD COLUMN views INTEGER NOT NULL DEFAULT 0`);
+} catch {
+  // column already exists — safe to ignore
+}
+
 export function all<T>(sql: string, params: SqlParam[] = []): T[] {
   return db.prepare(sql).all(...params) as T[];
 }

@@ -11,12 +11,16 @@ export default function RichHtml({ html, className = '' }: RichHtmlProps) {
     const normalized = html
       .replace(
         /https:\/\/www\.rshdbarabai\.com\/(uploads\/[^"' )]+)/g,
-        (_match, path) => `/api/public/media/legacy?path=${encodeURIComponent(path)}`,
+        (_match, p) => `/api/public/media/legacy?path=${encodeURIComponent(p)}`,
+      )
+      .replace(
+        /(["'(])\/(uploads\/news\/[^"' )]+)/g,
+        (_match, prefix, p) =>
+          `${prefix}/api/public/media/local/news/${encodeURIComponent(p.replace(/^uploads\/news\//, ''))}`,
       )
       .replace(
         /(["'(])\/(uploads\/[^"' )]+)/g,
-        (_match, prefix, path) =>
-          `${prefix}/api/public/media/legacy?path=${encodeURIComponent(path)}`,
+        (_match, prefix, p) => `${prefix}/api/public/media/legacy?path=${encodeURIComponent(p)}`,
       );
 
     return DOMPurify.sanitize(normalized);
