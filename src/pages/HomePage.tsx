@@ -1,15 +1,39 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, CalendarDays, Eye, Phone, PlayCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarDays, Eye, Phone, PlayCircle, Activity, FlaskConical, Stethoscope, Droplets } from 'lucide-react';
 import SectionHeading from '@/components/SectionHeading';
 import { formatDate, truncateHtml } from '@/lib/format';
 import { useSiteStore } from '@/store/siteStore';
 
-const featuredServiceIcons: Record<string, string> = {
-  hemo: 'https://rshdbarabai.com/themes/rshd/assets/img/png-icon/png-icon-13.png',
-  mcu: 'https://rshdbarabai.com/themes/rshd/assets/img/png-icon/png-icon-14.png',
-  laboratorium: 'https://rshdbarabai.com/themes/rshd/assets/img/png-icon/png-icon-13.png',
-  icu: 'https://rshdbarabai.com/themes/rshd/assets/img/png-icon/png-icon-12.png',
+const featuredServiceIcons: Record<string, React.ReactNode> = {
+  icu: (
+    <Activity
+      strokeWidth={1.75}
+      className="relative z-10 h-12 w-12 text-emerald-700"
+      aria-hidden
+    />
+  ),
+  hemo: (
+    <Droplets
+      strokeWidth={1.75}
+      className="relative z-10 h-12 w-12 text-emerald-700"
+      aria-hidden
+    />
+  ),
+  mcu: (
+    <Stethoscope
+      strokeWidth={1.75}
+      className="relative z-10 h-12 w-12 text-emerald-700"
+      aria-hidden
+    />
+  ),
+  laboratorium: (
+    <FlaskConical
+      strokeWidth={1.75}
+      className="relative z-10 h-12 w-12 text-emerald-700"
+      aria-hidden
+    />
+  ),
 };
 
 export default function HomePage() {
@@ -246,11 +270,7 @@ export default function HomePage() {
               {featuredServiceIcons[service.slug] ? (
                 <div className="relative mt-4 inline-flex h-20 w-20 items-center justify-center rounded-[1.6rem] bg-[#f4fbf7] ring-1 ring-emerald-100">
                   <div className="absolute left-1/2 top-[52%] h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#eef8f3]" aria-hidden />
-                  <img
-                    src={featuredServiceIcons[service.slug]}
-                    alt={service.title}
-                    className="relative z-10 h-12 w-12 object-contain"
-                  />
+                  {featuredServiceIcons[service.slug]}
                 </div>
               ) : null}
               <p className="mt-12 text-xs font-bold uppercase tracking-[0.35em] text-emerald-700">Layanan</p>

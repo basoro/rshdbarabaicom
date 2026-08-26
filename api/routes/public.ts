@@ -152,9 +152,13 @@ router.get('/media/pegawai', async (req: Request, res: Response) => {
     return;
   }
 
-  const response = await fetch(`${SITE_ORIGIN}/${requestedPath}`);
+  const baseUrl = process.env.LITE_BASE_URL || SITE_ORIGIN;
+  const photoUrl = `${baseUrl}/${requestedPath}`;
+  console.log('[media/pegawai] Fetching photo from:', photoUrl);
+  const response = await fetch(photoUrl);
 
   if (!response.ok) {
+    console.log('[media/pegawai] Photo not found, status:', response.status, '→ redirecting to fallback');
     res.redirect(doctorFallbackUrl);
     return;
   }
@@ -193,7 +197,7 @@ router.get('/bootstrap', async (_req: Request, res: Response) => {
     get<{ total: number }>(
       `SELECT COUNT(*) AS total FROM arsip_dokumen WHERE lower(jenis) = lower('Publik')`,
     )?.total ?? 0;
-  const featuredDoctors = await getFeaturedDoctors(8);
+  const featuredDoctors = await getFeaturedDoctors(20);
 
   res.json({
     success: true,
