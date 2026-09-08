@@ -9,7 +9,7 @@ export const heroSlides = [
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/KTvrVGD0yeo',
     image:
-      'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=indonesian%20regional%20hospital%20facade%2C%20green%20branding%2C%20modern%20healthcare%20campus%2C%20sunrise%20lighting%2C%20realistic%20editorial%20photography&image_size=landscape_16_9',
+      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-01.jpg',
   },
   {
     eyebrow: 'RSUD H. Damanhuri',
@@ -19,7 +19,7 @@ export const heroSlides = [
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/l-dLJOguwZI',
     image:
-      'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=child-friendly%20hospital%20interior%2C%20bright%20pediatric%20clinic%2C%20soft%20green%20and%20cream%20tones%2C%20realistic%20editorial%20photography&image_size=landscape_16_9',
+      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-02.jpg',
   },
   {
     eyebrow: 'RSUD H. Damanhuri',
@@ -29,7 +29,7 @@ export const heroSlides = [
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/YnE-tv47VU8',
     image:
-      'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=professional%20indonesian%20hospital%20staff%20welcoming%20patients%2C%20friendly%20service%2C%20green%20medical%20branding%2C%20realistic%20editorial%20photography&image_size=landscape_16_9',
+      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-03.jpg',
   },
 ];
 

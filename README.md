@@ -20,18 +20,24 @@ Website resmi Rumah Sakit Umum Daerah H. Damanhuri Barabai, Kabupaten Hulu Sunga
 5. [Database](#5-database)
    - [Tabel Penting](#tabel-penting)
    - [Sinkronisasi Data Berita (jika mlite_news di api/database.sdb kosong)](#sinkronisasi-data-berita-jika-mlite_news-di-apidatabasesdb-kosong)
-6. [Deployment ke Production](#6-deployment-ke-production)
-   - [6.1. File & Folder yang Wajib di-Upload](#61-file--folder-yang-wajib-di-upload)
-   - [6.2. Hal yang TIDAK Perlu di-Upload](#62-hal-yang-tidak-perlu-di-upload)
-   - [6.3. Step-by-step di Server](#63-step-by-step-di-server)
-   - [6.4. Menjalankan dengan PM2](#64-menjalankan-dengan-pm2)
-   - [6.5. Reverse Proxy (Nginx / HTTPS)](#65-reverse-proxy-nginx--https)
-7. [Verifikasi Setelah Deploy](#7-verifikasi-setelah-deploy)
-8. [CI/CD](#8-cicd)
-   - [8.1. GitHub Actions CI (lint · typecheck · build)](#81-github-actions-ci-lint--typecheck--build)
-   - [8.2. Deploy ke Production dengan `deploy.sh`](#82-deploy-ke-production-dengan-deploysh)
-   - [8.3. Masa Depan: Deploy via GitHub Actions (Opsional)](#83-masa-depan-deploy-via-github-actions-opsional)
-9. [Troubleshooting](#9-troubleshooting)
+6. [Fitur APAM (Aplikasi Pendaftaran & Antrian Mandiri)](#6-fitur-apam-aplikasi-pendaftaran--antrian-mandiri)
+   - [6.1. Ringkasan](#61-ringkasan)
+   - [6.2. Arsitektur](#62-arsitektur)
+   - [6.3. Endpoint API](#63-endpoint-api)
+   - [6.4. Frontend APAM](#64-frontend-apam)
+   - [6.5. Daftar Action API](#65-daftar-action-api)
+7. [Deployment ke Production](#7-deployment-ke-production)
+   - [7.1. File & Folder yang Wajib di-Upload](#71-file--folder-yang-wajib-di-upload)
+   - [7.2. Hal yang TIDAK Perlu di-Upload](#72-hal-yang-tidak-perlu-di-upload)
+   - [7.3. Step-by-step di Server](#73-step-by-step-di-server)
+   - [7.4. Menjalankan dengan PM2](#74-menjalankan-dengan-pm2)
+   - [7.5. Reverse Proxy (Nginx / HTTPS)](#75-reverse-proxy-nginx--https)
+8. [Verifikasi Setelah Deploy](#8-verifikasi-setelah-deploy)
+9. [CI/CD](#9-cicd)
+   - [9.1. GitHub Actions CI (lint · typecheck · build)](#91-github-actions-ci-lint--typecheck--build)
+   - [9.2. Deploy ke Production dengan `deploy.sh`](#92-deploy-ke-production-dengan-deploysh)
+   - [9.3. Masa Depan: Deploy via GitHub Actions (Opsional)](#93-masa-depan-deploy-via-github-actions-opsional)
+10. [Troubleshooting](#10-troubleshooting)
 
 ---
 
@@ -42,7 +48,7 @@ rshdbarabaicom/
 ├── api/                       # Backend Express + TypeScript
 │   ├── lib/                   # database.ts, auth.ts, content.ts, uploadPaths.ts
 │   ├── middleware/            # requireAdmin.ts
-│   ├── routes/                # admin.ts, public.ts
+│   ├── routes/                # admin.ts, public.ts, apam.ts
 │   ├── app.ts                 # init express, routes, static dist, uploads
 │   ├── server.ts              # entry point (listen port + graceful shutdown)
 │   └── database.sdb           # ⚠️ DATABASE AKTIF yang dibaca aplikasi
@@ -50,7 +56,7 @@ rshdbarabaicom/
 │   ├── components/            # komponen reusable
 │   ├── pages/                 # halaman (admin + publik)
 │   ├── lib/                   # api client, helpers, format
-│   └── store/                 # Zustand stores (admin, site/bootstrap)
+│   └── store/                 # Zustand stores (admin, site/bootstrap, apam)
 ├── uploads/                   # static upload (cover berita, arsip, logo)
 │   ├── news/
 │   ├── arsip/
@@ -111,6 +117,8 @@ Semua env dibaca oleh `dotenv` di [api/app.ts](api/app.ts#L15). Buat file `.env`
 | `MYSQL_PASSWORD`   | (opsional)                          | Password MySQL                                                                          |
 | `MYSQL_DATABASE`   | (opsional)                          | Nama DB MySQL                                                                           |
 | `MYSQL_PORT`       | `3306` (opsional)                   | Port MySQL                                                                              |
+
+> **MySQL wajib** jika menggunakan fitur APAM (Aplikasi Pendaftaran & Antrian Mandiri). Koneksi MySQL digunakan untuk query data pasien, jadwal dokter, booking, billing, dan data medis lainnya dari database rumah sakit (SIMRS).
 
 ### Cover Berita (IMAGE_URL & IMAGE_PATH)
 
@@ -195,11 +203,183 @@ import('node:sqlite').then(async ({ DatabaseSync }) => {
 
 ---
 
-## 6. Deployment ke Production
+## 6. Fitur APAM (Aplikasi Pendaftaran & Antrian Mandiri)
+
+### 6.1. Ringkasan
+
+**APAM** adalah sistem API pendaftaran online yang di-migrasi dari plugin PHP lama (`apam.php`) ke Express + TypeScript. Fitur ini menyediakan:
+
+- Pendaftaran pasien baru (register + verifikasi email)
+- Login pasien (sign in dengan No. RM + No. KTP)
+- Booking / pendaftaran periksa online
+- Telemedicine dengan pembayaran Duitku
+- Riwayat kunjungan (rawat jalan & rawat inap)
+- Notifikasi WhatsApp otomatis
+- Jadwal dokter & klinik
+- Pengaduan masyarakat
+- Ketersediaan kamar inap
+- Billing & profil pasien
+- Berita terkini
+
+### 6.2. Arsitektur
+
+```
+Frontend (React)                Backend (Express)              Database
+─────────────────               ─────────────────              ────────
+/apam/login  ──POST──→  /api/apam/login     ──→  SQLite (admin_sessions)
+/apam        ←Guard──   /api/apam/session    ──→  SQLite (admin_sessions)
+                           ↓
+/apam page  ──POST──→  /api/apam            ──→  MySQL (pasien, dokter, booking, dll)
+               (action)   (apam.ts)          ──→  SQLite (mlite_settings)
+```
+
+**Dua database digunakan:**
+- **SQLite** (`api/database.sdb`) — untuk pengaturan (`mlite_settings`), sesi login frontend (`admin_sessions`)
+- **MySQL** — untuk data rumah sakit (pasien, jadwal, booking, billing, riwayat, dll.)
+
+### 6.3. Endpoint API
+
+| Endpoint             | Method | Deskripsi                                            | Auth                |
+|----------------------|--------|------------------------------------------------------|---------------------|
+| `/api/apam/login`    | POST   | Login frontend (username + password)                 | Tidak               |
+| `/api/apam/session`  | GET    | Cek sesi login (Bearer token)                        | Bearer token        |
+| `/api/apam/logout`   | POST   | Logout / hapus sesi                                  | Bearer token        |
+| `/api/apam/`         | POST   | Main API — semua action via field `action`            | Token query/body    |
+
+### 6.4. Frontend APAM
+
+Halaman frontend tersedia di `/apam` dengan alur:
+
+```
+/apam           →  ApamGuard  →  cek token  →  redirect ke /apam/login jika belum login
+/apam/login     →  form login  →  POST /api/apam/login  →  simpan token  →  redirect /apam
+/apam           →  pilih action  →  isi form  →  kirim  →  lihat response JSON
+```
+
+**Autentikasi frontend** menggunakan tabel `mlite_users` yang sama dengan admin CMS. Token disimpan di `localStorage` (key: `rshd-apam-token`) dengan masa aktif 7 hari.
+
+### 6.5. Daftar Action API
+
+Semua action dikirim via `POST /api/apam/` dengan field `action` di body request.
+
+| Action | Parameter | Deskripsi |
+|--------|-----------|----------|
+| `signin` | `no_rkm_medis`, `no_ktp` | Login pasien (verifikasi No. RM + KTP) |
+| `register` | `nama_lengkap`, `email`, `nomor_ktp`, `nomor_telepon` | Registrasi pasien baru |
+| `postregister` | `email` | Cek data registrasi pending |
+| `saveregister` | `nm_pasien`, `email`, `no_ktp`, `no_tlp`, `jk`, `tgl_lahir`, `alamat` | Simpan data pasien baru |
+| `profil` | `no_rkm_medis` | Profil lengkap pasien |
+| `notifikasi` | `no_rkm_medis` | Daftar notifikasi belum dibaca |
+| `notifikasilist` | `no_rkm_medis` | Semua notifikasi |
+| `tandaisudahdibaca` | `id` | Tandai notifikasi sudah dibaca |
+| `notifbooking` | `no_rkm_medis` | Status booking hari ini |
+| `booking` | `no_rkm_medis` | Daftar semua booking |
+| `bookingdetail` | `no_rkm_medis`, `tanggal_periksa`, `no_reg` | Detail satu booking |
+| `daftar` | `no_rkm_medis`, `tanggal`, `kd_poli`, `kd_dokter`, `kd_pj` | Buat booking baru + kirim WhatsApp |
+| `sukses` | `no_rkm_medis` | Booking sukses hari ini |
+| `lastbooking` | — | Cek booking terakhir |
+| `dokter` | `tanggal` (opsional) | Jadwal dokter hari itu |
+| `jadwalklinik` | `tanggal` | Jadwal per poliklinik |
+| `jadwaldokter` | `tanggal`, `kd_poli` | Dokter yang jaga per poli |
+| `riwayat` | `no_rkm_medis` | Riwayat rawat jalan |
+| `riwayatdetail` | `no_rkm_medis`, `tgl_registrasi`, `no_reg` | Detail riwayat (obat, lab, radiologi) |
+| `riwayatranap` | `no_rkm_medis` | Riwayat rawat inap |
+| `riwayatranapdetail` | `no_rkm_medis`, `tgl_registrasi`, `no_reg` | Detail riwayat ranap |
+| `billing` | `no_rkm_medis` | Daftar billing |
+| `hitungralan` | `no_rkm_medis` | Jumlah kunjungan ralan |
+| `hitungranap` | `no_rkm_medis` | Jumlah kunjungan ranap |
+| `kamar` | — | Ketersediaan kamar per kelas |
+| `rawatjalan` | — | Daftar poliklinik aktif |
+| `rawatinap` | — | Daftar kamar + bangsal |
+| `laboratorium` | — | Jenis pemeriksaan lab |
+| `radiologi` | — | Jenis pemeriksaan radiologi |
+| `carabayar` | — | Daftar penjamin / cara bayar |
+| `pengaduan` | `no_rkm_medis` | Daftar pengaduan |
+| `pengaduandetail` | `pengaduan_id` | Detail percakapan pengaduan |
+| `simpanpengaduan` | `no_rkm_medis`, `message` | Kirim pengaduan baru |
+| `simpanpengaduandetail` | `no_rkm_medis`, `message`, `pengaduan_id` | Balas pengaduan |
+| `telemedicine` | `tanggal` (opsional) | Jadwal telemedicine |
+| `telemedicinedaftar` | `no_rkm_medis`, `tanggal`, `kd_poli`, `kd_dokter` | Daftar telemedicine + bayar Duitku |
+| `telemedicinesukses` | `no_rkm_medis` | Status booking telemedicine |
+| `duitku_callback` | `merchantCode`, `amount`, `merchantOrderId`, `signature`, `resultCode` | Callback pembayaran Duitku |
+| `lastnews` | — | Berita terbaru (limit dari settings) |
+| `news` | — | Semua berita published |
+| `newsdetail` | `id` | Detail satu berita |
+| `layananunggulan` | — | Pengaturan website (widget) |
+| `cekrujukan` | — | Cek rujukan (placeholder) |
+| `antrian` | — | Status antrian |
+| `simpanretensirekammedik` | `no_rkm_medis` | Simpan retensi rekam medis |
+
+**Contoh request:**
+
+```bash
+curl -X POST http://localhost:3001/api/apam/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "YOUR_APAM_KEY",
+    "action": "dokter",
+    "tanggal": "2026-09-08"
+  }'
+```
+
+**Contoh response:**
+
+```json
+[
+  {
+    "nm_dokter": "dr. Ahmad, Sp.PD",
+    "jk": "L",
+    "nm_poli": "Penyakit Dalam",
+    "jam_mulai": "08:00",
+    "jam_selesai": "12:00",
+    "kd_dokter": "001"
+  }
+]
+```
+
+### Pengaturan APAM di Database
+
+Pengaturan APAM disimpan di tabel `mlite_settings` dengan module `api`:
+
+| Field | Deskripsi |
+|-------|----------|
+| `apam_key` | Token API untuk autentikasi request |
+| `apam_limit` | Batas kuota pendaftaran online per hari |
+| `apam_kdpj` | Kode penanggung jawab default |
+| `apam_kdkec` | Kode kecamatan default |
+| `apam_kdkab` | Kode kabupaten default |
+| `apam_kdprop` | Kode provinsi default |
+| `apam_webappsurl` | Base URL web apps (untuk callback Duitku) |
+| `apam_status_daftar` | Status pendaftaran |
+| `apam_status_dilayani` | Status sedang dilayani |
+| `apam_normpetugas` | No. RM petugas yang bisa lihat semua pengaduan |
+| `apam_smtp_host` | SMTP host untuk email verifikasi |
+| `apam_smtp_port` | SMTP port |
+| `apam_smtp_username` | SMTP username |
+| `apam_smtp_password` | SMTP password |
+| `duitku_merchantCode` | Kode merchant Duitku |
+| `duitku_merchantKey` | Merchant key Duitku |
+| `duitku_paymentAmount` | Nominal pembayaran telemedicine |
+| `duitku_paymentMethod` | Metode pembayaran (VC, WW, MY, BK) |
+| `duitku_kdpj` | Kode penanggung jawab telemedicine |
+| `duitku_productDetails` | Nama produk pembayaran |
+| `duitku_expiryPeriod` | Masa berlaku pembayaran (menit) |
+
+Pengaturan WhatsApp gateway (module `wagateway`):
+
+| Field | Deskripsi |
+|-------|----------|
+| `wagateway.server` | URL server WhatsApp gateway |
+| `wagateway.token` | API key WhatsApp gateway |
+| `wagateway.phonenumber` | Nomor pengirim WhatsApp |
+
+---
+
+## 7. Deployment ke Production
 
 Dokumen ringkas juga ada di [DEPLOYMENT.md](DEPLOYMENT.md#L1-L33). Berikut panduan LENGKAP.
 
-### 6.1. File & Folder yang Wajib di-Upload
+### 7.1. File & Folder yang Wajib di-Upload
 
 **Kelompok A — kode & konfigurasi** (tarik via `git pull` atau `rsync`):
 ```
@@ -238,7 +418,7 @@ uploads/
 ```
 > **WAJIB**: Pastikan setiap nama file yang muncul di kolom `mlite_news.cover_photo` ada fisiknya di direktori sesuai `IMAGE_PATH`. Jika `cover_photo = "bupati.jpg"` dan `IMAGE_PATH = uploads/website/news`, maka file harus benar-benar ada di: `uploads/website/news/bupati.jpg`. Jika tidak, gambar akan 404.
 
-### 6.2. Hal yang TIDAK Perlu di-Upload
+### 7.2. Hal yang TIDAK Perlu di-Upload
 
 Jangan upload / biarkan server yang generate sendiri:
 - `node_modules/` → jalankan `npm ci` di server.
@@ -246,7 +426,7 @@ Jangan upload / biarkan server yang generate sendiri:
 - `.env` → buat manual di server (jangan commit).
 - `.vite/`, `.DS_Store`, `npm-debug.log*`, dll.
 
-### 6.3. Step-by-step di Server
+### 7.3. Step-by-step di Server
 
 SSH ke server production, `cd` ke direktori app (mis. `/var/www/rshdbarabai.com`).
 
@@ -272,7 +452,7 @@ NODE_ENV=production PORT=3001 npm run start
 # tekan Ctrl+C untuk berhenti, lalu lanjut pakai PM2 di bawah
 ```
 
-### 6.4. Menjalankan dengan PM2
+### 7.4. Menjalankan dengan PM2
 
 Disarankan agar proses restart otomatis kalau crash / server reboot.
 
@@ -316,7 +496,7 @@ Disarankan agar proses restart otomatis kalau crash / server reboot.
    pm2 stop    rshdbarabaicom
    ```
 
-### 6.5. Reverse Proxy (Nginx / HTTPS)
+### 7.5. Reverse Proxy (Nginx / HTTPS)
 
 Aplikasi hanya listen di `127.0.0.1:3001`, akses HTTPS domain diatur via Nginx (atau Apache / Caddy).
 
@@ -380,7 +560,7 @@ sudo systemctl reload nginx
 
 ---
 
-## 7. Verifikasi Setelah Deploy
+## 8. Verifikasi Setelah Deploy
 
 Jalankan urutan di bawah setelah app + Nginx live:
 
@@ -409,13 +589,13 @@ curl -sS https://rshdbarabai.com/api/public/bootstrap | python3 -m json.tool | g
 #    - https://rshdbarabai.com/admin/login -> login CMS admin lalu buka /admin/news
 ```
 
-Jika salah satu poin di atas gagal, lihat [Troubleshooting](#9-troubleshooting).
+Jika salah satu poin di atas gagal, lihat [Troubleshooting](#10-troubleshooting).
 
 ---
 
-## 8. CI/CD
+## 9. CI/CD
 
-### 8.1. GitHub Actions CI (lint · typecheck · build)
+### 9.1. GitHub Actions CI (lint · typecheck · build)
 
 Setiap **push ke `main`** atau **pull request ke `main`** akan menjalankan workflow `.github/workflows/ci.yml` untuk memastikan:
 
@@ -430,7 +610,7 @@ Contoh hasil di GitHub:
 - Tab **Actions** repo → pilih workflow **CI** → muncul job `Lint · Typecheck · Build`
 - Jika gagal: klik job, expand step yang merah untuk error message (biasanya karena ada TS error type baru / lint).
 
-### 8.2. Deploy ke Production dengan `deploy.sh`
+### 9.2. Deploy ke Production dengan `deploy.sh`
 
 Tersedia skrip deploy [deploy.sh](deploy.sh#L1-L239) untuk deploy dari **lokal** ke server production via **rsync + SSH + PM2 reload zero-downtime**.
 
@@ -490,7 +670,7 @@ Output alur deploy:
   ```
 - Alternatif: deploy commit lama dari lokal (checkout commit yang stabil → jalankan `./deploy.sh`).
 
-### 8.3. Masa Depan: Deploy via GitHub Actions (Opsional)
+### 9.3. Masa Depan: Deploy via GitHub Actions (Opsional)
 
 Jika nanti mau **push ke `main` → otomatis deploy** tanpa jalankan `./deploy.sh` manual di lokal:
 
@@ -506,7 +686,7 @@ Kami sarankan mulai dengan **`deploy.sh` dulu** (paling aman: tidak expose creds
 
 ---
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 ### Q: Berita tidak muncul di publik / halaman `/news` kosong?
 1. Cek jumlah baris di DB aktif:
@@ -551,6 +731,26 @@ pm2 reload rshdbarabaicom
 pm2 logs rshdbarabaicom --lines 40
 ```
 Jika ada kesalahan kritis, `pm2 reload` otomatis rollback ke versi lama jika health check gagal (bisa tambah `--listen-timeout 8000` dan health check route di ecosystem.config).
+
+### Q: API APAM mengembalikan error koneksi MySQL?
+- Pastikan environment variable `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE` sudah di-set di `.env`.
+- Pastikan MySQL server berjalan dan bisa diakses dari server aplikasi.
+- Test koneksi: `mysql -h $MYSQL_HOST -u $MYSQL_USER -p $MYSQL_DATABASE -e "SELECT 1"`
+- Jika MySQL tidak tersedia, fitur APAM tidak akan berfungsi (endpoint `/api/apam/` akan return error 500).
+
+### Q: Login APAM di frontend gagal "Username atau password salah"?
+- APAM menggunakan tabel `mlite_users` yang sama dengan admin CMS. Pastikan username dan password sudah terdaftar di tabel tersebut.
+- Cek via SQLite: `node -e "import('node:sqlite').then(async({DatabaseSync})=>{const{default:{resolve}}=await import('path');const db=new DatabaseSync(resolve(process.cwd(),'api/database.sdb'));console.log(db.prepare('SELECT id,username FROM mlite_users').all())})"`
+
+### Q: Token API APAM "Error key"?
+- Token APAM disimpan di `mlite_settings` dengan module `api` dan field `apam_key`.
+- Cek di database: `SELECT value FROM mlite_settings WHERE module='api' AND field='apam_key'`
+- Pastikan token yang dikirim dalam request sesuai dengan nilai di database.
+
+### Q: Notifikasi WhatsApp tidak terkirim setelah booking?
+- WhatsApp gateway harus dikonfigurasi di `mlite_settings` module `wagateway` (`server`, `token`, `phonenumber`).
+- Pastikan nomor pasien (`no_tlp`) terisi di tabel `pasien`.
+- WhatsApp gateway harus bisa diakses dari server (cek firewall / network).
 
 ---
 

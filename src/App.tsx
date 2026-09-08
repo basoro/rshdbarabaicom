@@ -14,6 +14,9 @@ import HomePage from '@/pages/HomePage';
 import NewsDetailPage from '@/pages/NewsDetailPage';
 import NewsListPage from '@/pages/NewsListPage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import ApamGuard from '@/components/ApamGuard';
+import ApamLoginPage from '@/pages/ApamLoginPage';
+import ApamPage from '@/pages/ApamPage';
 import PageContentPage from '@/pages/PageContentPage';
 
 export default function App() {
@@ -29,6 +32,11 @@ export default function App() {
           <Route path="arsip" element={<AdminArchivesPage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="settings" element={<AdminSettingsPage />} />
+        </Route>
+
+        <Route path="/apam/login" element={<ApamLoginPage />} />
+        <Route path="/apam" element={<ApamGuard />}>
+          <Route index element={<ApamPage />} />
         </Route>
 
         <Route path="/" element={<PublicLayout />}>

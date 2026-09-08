@@ -263,6 +263,30 @@ export function adminSaveSettings(token: string, settings: Record<string, string
   });
 }
 
+export function apamLogin(username: string, password: string) {
+  return request<{ token: string; user: { id: number; username: string; fullname: string | null; email: string; role: string; access: string } }>('/api/apam/login', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  });
+}
+
+export function apamSession(token: string) {
+  return request<{ user: { id: number; username: string; fullname: string | null; email: string; role: string; access: string } }>('/api/apam/session', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export function apamLogout(token: string) {
+  return request<true>('/api/apam/logout', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
 export function adminUploadFile(token: string, file: File, target: string) {
   const formData = new FormData();
   formData.append('target', target);

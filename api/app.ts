@@ -10,6 +10,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import adminRoutes from './routes/admin.js'
 import publicRoutes from './routes/public.js'
+import apamRoutes from './routes/apam.js'
 
 // load env
 dotenv.config()
@@ -29,6 +30,7 @@ app.use('/uploads', express.static(uploadsPath))
 
 app.use('/api/public', publicRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/apam', apamRoutes)
 
 /**
  * health
