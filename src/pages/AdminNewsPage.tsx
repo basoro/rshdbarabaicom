@@ -338,7 +338,7 @@ export default function AdminNewsPage() {
             label="Upload cover berita"
             target="news"
             accept="image/*"
-            helpText="Gambar akan disimpan ke folder uploads/news dan path-nya otomatis diisi ke cover."
+            helpText="Gambar akan disimpan ke folder api/public/media/local/news dan path-nya otomatis diisi ke cover."
             onUploaded={(result) =>
               setForm((current) => ({
                 ...current,

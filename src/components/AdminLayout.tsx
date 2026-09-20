@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
-import { FileText, LayoutDashboard, LogOut, Newspaper, Settings, Shield, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, LayoutDashboard, LogOut, Newspaper, Settings, Shield, Users } from 'lucide-react';
 import { canAccessAdminModule, type AdminModuleKey } from '@/lib/adminAccess';
 import { useAdminStore } from '@/store/adminStore';
 
@@ -20,11 +20,26 @@ const adminLinks: Array<{
 
 export default function AdminLayout() {
   const location = useLocation();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return window.localStorage.getItem('rshd-admin-sidebar-collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const { initialized, initialize, loading, token, user, logout } = useAdminStore();
 
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('rshd-admin-sidebar-collapsed', String(sidebarCollapsed));
+    } catch {
+      // Ignore storage errors (for example, private browsing restrictions).
+    }
+  }, [sidebarCollapsed]);
 
   const visibleLinks = useMemo(
     () =>
@@ -58,13 +73,45 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
-        <aside className="border-r border-white/10 bg-slate-900 px-6 py-8">
-          <Link to="/" className="block rounded-[2rem] border border-white/10 bg-white/5 p-5">
-            <p className="text-xs uppercase tracking-[0.35em] text-emerald-300">CMS</p>
-            <h1 className="mt-3 font-display text-4xl text-white">RSHD</h1>
-            <p className="mt-2 text-sm text-slate-400">Manajemen website dan konten rumah sakit</p>
-          </Link>
+      <div
+        className={`grid min-h-screen transition-[grid-template-columns] duration-300 ${
+          sidebarCollapsed ? 'lg:grid-cols-[88px_1fr]' : 'lg:grid-cols-[280px_1fr]'
+        }`}
+      >
+        <aside className={`border-r border-white/10 bg-slate-900 px-4 py-8 transition-all duration-300 ${sidebarCollapsed ? 'lg:px-3' : 'lg:px-6'}`}>
+          <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
+            <Link
+              to="/"
+              title="Buka situs publik"
+              className={`flex items-center rounded-2xl border border-white/10 bg-white/5 transition hover:bg-white/10 ${sidebarCollapsed ? 'h-12 w-12 justify-center' : 'gap-3 px-4 py-3'}`}
+            >
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-300">CMS</span>
+              {!sidebarCollapsed ? <span className="font-display text-2xl text-white">RSHD</span> : null}
+            </Link>
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed((current) => !current)}
+              title={sidebarCollapsed ? 'Buka sidebar' : 'Ciutkan sidebar'}
+              aria-label={sidebarCollapsed ? 'Buka sidebar' : 'Ciutkan sidebar'}
+              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 text-slate-300 transition hover:bg-white/10 hover:text-white ${sidebarCollapsed ? 'hidden' : ''}`}
+            >
+              {sidebarCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+            </button>
+          </div>
+          {!sidebarCollapsed ? (
+            <p className="mt-3 px-1 text-xs leading-5 text-slate-400">Manajemen website dan konten rumah sakit</p>
+          ) : null}
+          {sidebarCollapsed ? (
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed(false)}
+              title="Buka sidebar"
+              aria-label="Buka sidebar"
+              className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-xl border border-white/10 text-slate-300 transition hover:bg-white/10 hover:text-white"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          ) : null}
 
           <nav className="mt-8 space-y-2">
             {visibleLinks.map((item) => {
@@ -74,14 +121,16 @@ export default function AdminLayout() {
                   key={item.to}
                   to={item.to}
                   end={item.to === '/admin'}
+                  title={sidebarCollapsed ? item.label : undefined}
+                  aria-label={sidebarCollapsed ? item.label : undefined}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition ${
+                    `flex items-center rounded-2xl py-3 text-sm font-medium transition ${sidebarCollapsed ? 'justify-center px-3' : 'gap-3 px-4'} ${
                       isActive ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white'
                     }`
                   }
                 >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
+                  <Icon className="h-4 w-4 shrink-0" />
+                  {!sidebarCollapsed ? <span>{item.label}</span> : null}
                 </NavLink>
               );
             })}

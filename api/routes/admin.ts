@@ -81,6 +81,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '../..');
 const uploadsRoot = path.join(projectRoot, 'uploads');
+const localMediaRoot = path.join(projectRoot, 'api', 'public', 'media', 'local');
 
 const uploadStorage = multer.diskStorage({
   destination: (_req, _file, callback) => {
@@ -91,7 +92,9 @@ const uploadStorage = multer.diskStorage({
           ? _req.body.target
           : 'misc';
     const target = requestTarget.replace(/[^a-z0-9-_]+/gi, '').toLowerCase() || 'misc';
-    const folder = path.join(uploadsRoot, target);
+    const folder = ['news', 'pages', 'arsip'].includes(target)
+      ? path.join(localMediaRoot, target)
+      : path.join(uploadsRoot, target);
     fs.mkdirSync(folder, { recursive: true });
     callback(null, folder);
   },

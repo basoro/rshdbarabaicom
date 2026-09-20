@@ -227,7 +227,7 @@ export default function AdminPagesPage() {
             label="Upload gambar untuk halaman"
             target="pages"
             accept="image/*"
-            helpText="File akan disimpan ke folder uploads/pages. URL hasil upload otomatis disisipkan ke konten HTML."
+            helpText="File akan disimpan ke folder api/public/media/local/pages. URL hasil upload otomatis disisipkan ke konten HTML."
             onUploaded={(result) =>
               setForm((current) => ({
                 ...current,

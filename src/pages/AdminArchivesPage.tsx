@@ -207,7 +207,7 @@ export default function AdminArchivesPage() {
           <AdminUploadField
             label="Upload file arsip"
             target="arsip"
-            helpText="Dokumen akan disimpan ke folder uploads/arsip. Path dan ekstensi akan terisi otomatis."
+            helpText="Dokumen akan disimpan ke folder api/public/media/local/arsip. Path dan ekstensi akan terisi otomatis."
             onUploaded={(result) =>
               setForm((current) => ({
                 ...current,

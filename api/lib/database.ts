@@ -117,9 +117,14 @@ db.exec(`
 `);
 
 db.exec(`
-  INSERT OR REPLACE INTO users (id, username, fullname, email)
+  INSERT INTO users (id, username, fullname, email)
   SELECT id, username, COALESCE(fullname, ''), COALESCE(email, '')
   FROM mlite_users
+  WHERE 1
+  ON CONFLICT(id) DO UPDATE SET
+    username = excluded.username,
+    fullname = excluded.fullname,
+    email = excluded.email
 `);
 
 // Migration: add views column to mlite_news if missing
@@ -149,8 +154,12 @@ export function syncLegacyUser(user: {
 }): void {
   run(
     `
-      INSERT OR REPLACE INTO users (id, username, fullname, email)
+      INSERT INTO users (id, username, fullname, email)
       VALUES (?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        username = excluded.username,
+        fullname = excluded.fullname,
+        email = excluded.email
     `,
     [user.id, user.username, user.fullname ?? '', user.email ?? ''],
   );

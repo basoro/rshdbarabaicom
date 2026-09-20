@@ -80,9 +80,13 @@ function mapNews(row: NewsRow) {
 router.get('/media/local/:target/:filename', (req: Request, res: Response) => {
   const target = req.params.target.replace(/[^a-z0-9-_]+/gi, '').toLowerCase();
   const filename = path.basename(req.params.filename);
-  const filePath = path.join(localMediaRoot, target, filename);
+  const candidatePaths = [
+    path.join(localMediaRoot, target, filename),
+    path.join(uploadsRoot, target, filename),
+  ];
+  const filePath = candidatePaths.find((candidate) => fs.existsSync(candidate));
 
-  if (!fs.existsSync(filePath)) {
+  if (!filePath) {
     res.redirect(imageFallbackUrl);
     return;
   }

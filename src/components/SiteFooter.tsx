@@ -110,7 +110,7 @@ export default function SiteFooter({ bootstrap }: SiteFooterProps) {
             html={footerHtml}
             className="prose prose-sm text-emerald-200/70 prose-p:my-0 prose-a:text-white prose-a:no-underline hover:prose-a:text-emerald-100"
           />
-          <p>Frontend React + SQLite CMS</p>
+          <p>Powered by mLITE.id</p>
         </div>
       </div>
     </footer>
