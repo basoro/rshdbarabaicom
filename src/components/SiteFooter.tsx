@@ -33,8 +33,7 @@ export default function SiteFooter({ bootstrap }: SiteFooterProps) {
       </div>
       <div className="container grid gap-10 py-14 md:grid-cols-2 xl:grid-cols-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300">RSHD Barabai</p>
-          <h3 className="mt-3 font-display text-[2.4rem] font-semibold">{bootstrap.settings.nama_instansi || 'RSUD H. Damanhuri'}</h3>
+          <h3 className="font-display text-[1.85rem] font-semibold">{bootstrap.settings.nama_instansi || 'RSUD H. Damanhuri'}</h3>
           <div className="mt-6 space-y-3 text-sm text-emerald-100/80">
             <p className="flex items-start gap-3">
               <MapPin className="mt-1 h-4 w-4" />

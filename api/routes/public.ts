@@ -58,6 +58,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '../..');
 const uploadsRoot = path.resolve(__dirname, '../../uploads');
+const localMediaRoot = path.resolve(__dirname, '../public/media/local');
 
 const router = Router();
 const PUBLIC_NEWS_STATUS = 2;
@@ -79,7 +80,7 @@ function mapNews(row: NewsRow) {
 router.get('/media/local/:target/:filename', (req: Request, res: Response) => {
   const target = req.params.target.replace(/[^a-z0-9-_]+/gi, '').toLowerCase();
   const filename = path.basename(req.params.filename);
-  const filePath = path.join(uploadsRoot, target, filename);
+  const filePath = path.join(localMediaRoot, target, filename);
 
   if (!fs.existsSync(filePath)) {
     res.redirect(imageFallbackUrl);

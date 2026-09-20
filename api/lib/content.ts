@@ -8,8 +8,7 @@ export const heroSlides = [
       'Pemanfaatan teknologi inovatif untuk meningkatkan kualitas perawatan dan pengalaman pasien.',
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/KTvrVGD0yeo',
-    image:
-      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-01.jpg',
+    image: '/api/public/media/local/hero/hero-01.jpg',
   },
   {
     eyebrow: 'RSUD H. Damanhuri',
@@ -18,8 +17,7 @@ export const heroSlides = [
       'Ruang bermain anak yang aman serta area menyusui yang nyaman untuk keluarga pasien.',
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/l-dLJOguwZI',
-    image:
-      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-02.jpg',
+    image: '/api/public/media/local/hero/hero-02.jpg',
   },
   {
     eyebrow: 'RSUD H. Damanhuri',
@@ -28,8 +26,7 @@ export const heroSlides = [
       'Layanan berkarakter, ikhlas, dan berakhlak dengan semangat 5S di seluruh area rumah sakit.',
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/YnE-tv47VU8',
-    image:
-      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-03.jpg',
+    image: '/api/public/media/local/hero/hero-03.jpg',
   },
 ];
 

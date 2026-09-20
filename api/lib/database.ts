@@ -15,7 +15,69 @@ const databasePath = path.resolve(__dirname, '../database.sdb');
 
 export const db = new DatabaseSync(databasePath);
 
+// A clean checkout may not include the production SQLite dump. Create the
+// tables required by the public site and admin CMS so local development boots.
 db.exec(`
+  CREATE TABLE IF NOT EXISTS mlite_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    fullname TEXT DEFAULT '',
+    description TEXT DEFAULT '',
+    password TEXT NOT NULL DEFAULT '',
+    avatar TEXT DEFAULT '',
+    email TEXT NOT NULL DEFAULT '',
+    role TEXT NOT NULL DEFAULT 'admin',
+    cap TEXT DEFAULT '',
+    access TEXT NOT NULL DEFAULT 'all'
+  );
+
+  CREATE TABLE IF NOT EXISTS pages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
+    desc TEXT DEFAULT '',
+    template TEXT NOT NULL DEFAULT 'page.html',
+    date TEXT NOT NULL DEFAULT '',
+    content TEXT NOT NULL DEFAULT '',
+    markdown INTEGER NOT NULL DEFAULT 0
+  );
+
+  CREATE TABLE IF NOT EXISTS mlite_news (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
+    user_id INTEGER NOT NULL DEFAULT 0,
+    content TEXT NOT NULL DEFAULT '',
+    intro TEXT DEFAULT '',
+    cover_photo TEXT DEFAULT '',
+    status INTEGER NOT NULL DEFAULT 1,
+    comments INTEGER NOT NULL DEFAULT 1,
+    markdown INTEGER NOT NULL DEFAULT 0,
+    views INTEGER NOT NULL DEFAULT 0,
+    published_at INTEGER NOT NULL DEFAULT 0,
+    updated_at INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL DEFAULT 0
+  );
+
+  CREATE TABLE IF NOT EXISTS arsip_dokumen (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    kategori TEXT NOT NULL DEFAULT '',
+    jenis TEXT NOT NULL DEFAULT '',
+    nama_dokumen TEXT NOT NULL DEFAULT '',
+    tahun INTEGER NOT NULL DEFAULT 0,
+    file_path TEXT NOT NULL DEFAULT '',
+    ekstensi TEXT NOT NULL DEFAULT 'pdf',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS mlite_settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    module TEXT NOT NULL DEFAULT 'settings',
+    field TEXT NOT NULL,
+    value TEXT DEFAULT '',
+    UNIQUE(module, field)
+  );
+
   CREATE TABLE IF NOT EXISTS admin_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,

@@ -41,9 +41,9 @@ export default function HomePage() {
   const slides = useMemo(() => bootstrap?.heroSlides ?? [], [bootstrap?.heroSlides]);
   const [activeSlide, setActiveSlide] = useState(0);
   const doctorSliderRef = useRef<HTMLDivElement | null>(null);
-  const aboutImage = 'https://www.rshdbarabai.com/themes/rshd/assets/img/about/about-02.jpg';
-  const aboutVideoIcon = 'https://www.rshdbarabai.com/themes/rshd/assets/img/png-icon/png-icon-09.png';
-  const signatureImage = 'https://www.rshdbarabai.com/themes/rshd/assets/img/png-icon/ttd.png';
+  const aboutImage = '/api/public/media/local/about/about-02.jpg';
+  const aboutVideoIcon = '/api/public/media/local/png-icon/png-icon-09.png';
+  const signatureImage = '/api/public/media/local/png-icon/ttd.png';
   const doctorPlaceholder =
     'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=professional%20indonesian%20doctor%20portrait%2C%20white%20coat%2C%20friendly%20hospital%20staff%2C%20green%20medical%20background%2C%20realistic%20editorial%20photography&image_size=portrait_4_3';
 
