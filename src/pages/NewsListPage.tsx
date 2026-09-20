@@ -28,7 +28,7 @@ export default function NewsListPage() {
       <SectionHeading
         eyebrow="Berita dan Informasi"
         title="Berita, informasi, dan artikel terkini"
-        description="Semua artikel dibaca langsung dari SQLite sehingga publikasi yang dilakukan lewat CMS admin akan muncul di sini."
+        // description="Semua artikel dibaca langsung dari SQLite sehingga publikasi yang dilakukan lewat CMS admin akan muncul di sini."
       />
 
       {loading ? (

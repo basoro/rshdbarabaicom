@@ -2,10 +2,13 @@ import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import SiteFooter from '@/components/SiteFooter';
 import SiteHeader from '@/components/SiteHeader';
+import useTrackVisit from '@/hooks/useTrackVisit';
 import { useSiteStore } from '@/store/siteStore';
 
 export default function PublicLayout() {
   const { bootstrap, error, loading, loadBootstrap } = useSiteStore();
+
+  useTrackVisit();
 
   useEffect(() => {
     loadBootstrap();

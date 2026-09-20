@@ -516,6 +516,7 @@ router.get('/dashboard', requireAdminModule('dashboard'), (req: Request, res: Re
   const news = get<{ total: number }>(`SELECT COUNT(*) AS total FROM mlite_news`)?.total ?? 0;
   const archives = get<{ total: number }>(`SELECT COUNT(*) AS total FROM arsip_dokumen`)?.total ?? 0;
   const users = get<{ total: number }>(`SELECT COUNT(*) AS total FROM mlite_users`)?.total ?? 0;
+  const visits = get<{ total: number }>(`SELECT COUNT(*) AS total FROM site_visits`)?.total ?? 0;
 
   const newsByUser = all<{ user_id: number; username: string; fullname: string | null; total: number }>(
     `
@@ -546,6 +547,17 @@ router.get('/dashboard', requireAdminModule('dashboard'), (req: Request, res: Re
     `,
     [yearStart, yearEnd],
   );
+  const visitsByMonthRows = all<{ bulan: number; total: number }>(
+    `
+      SELECT CAST(strftime('%m', datetime(created_at, 'unixepoch')) AS INTEGER) AS bulan,
+             COUNT(*) AS total
+      FROM site_visits
+      WHERE created_at >= ? AND created_at < ?
+      GROUP BY bulan
+      ORDER BY bulan ASC
+    `,
+    [yearStart, yearEnd],
+  );
 
   const monthLabels = [
     'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
@@ -553,6 +565,14 @@ router.get('/dashboard', requireAdminModule('dashboard'), (req: Request, res: Re
   ];
   const newsByMonth = monthLabels.map((label, index) => {
     const match = newsByMonthRows.find((row) => row.bulan === index + 1);
+    return {
+      month: index + 1,
+      label,
+      total: match?.total ?? 0,
+    };
+  });
+  const visitsByMonth = monthLabels.map((label, index) => {
+    const match = visitsByMonthRows.find((row) => row.bulan === index + 1);
     return {
       month: index + 1,
       label,
@@ -568,9 +588,11 @@ router.get('/dashboard', requireAdminModule('dashboard'), (req: Request, res: Re
         { label: 'Berita', value: news },
         { label: 'Arsip', value: archives },
         { label: 'Admin', value: users },
+        { label: 'Kunjungan', value: visits },
       ],
       newsByUser,
       newsByMonth,
+      visitsByMonth,
       currentUser: req.adminUser,
     },
   });

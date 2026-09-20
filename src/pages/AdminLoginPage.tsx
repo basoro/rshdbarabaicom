@@ -29,9 +29,9 @@ export default function AdminLoginPage() {
         </div>
         <p className="mt-6 text-sm uppercase tracking-[0.35em] text-emerald-300">CMS RSHD</p>
         <h1 className="mt-4 font-display text-5xl">Masuk Admin</h1>
-        <p className="mt-3 text-sm leading-7 text-slate-300">
+        {/* <p className="mt-3 text-sm leading-7 text-slate-300">
           Login menggunakan akun pada tabel `mlite_users` untuk mengelola website dan konten.
-        </p>
+        </p> */}
 
         <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
           <input

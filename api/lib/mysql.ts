@@ -50,18 +50,17 @@ function resolveDoctorPhotoPath(photoPath: string | null): string | null {
 }
 
 function buildDoctorFallback(name: string, specialty: string, gender: 'L' | 'P' | null): string {
-  const description =
-    gender === 'P'
-      ? 'female doctor portrait'
-      : gender === 'L'
-        ? 'male doctor portrait'
-        : 'professional doctor portrait';
-
-  const prompt = encodeURIComponent(
-    `${description}, Indonesian hospital specialist, ${specialty}, white coat, green medical background, realistic editorial photography`,
+  const slug = encodeURIComponent(
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || `dokter-${gender ?? 'x'}`,
   );
-
-  return `https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${prompt}&image_size=portrait_4_3`;
+  const spec = encodeURIComponent(
+    specialty.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'spesialis',
+  );
+  const g = gender === 'P' ? 'p' : gender === 'L' ? 'l' : 'x';
+  return `/api/public/media/pegawai-fallback?i=${slug}&s=${spec}&g=${g}`;
 }
 
 export async function getFeaturedDoctors(limit = 8): Promise<DoctorProfile[]> {

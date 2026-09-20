@@ -24,6 +24,16 @@ db.exec(`
     created_at INTEGER NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS site_visits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    path TEXT NOT NULL,
+    title TEXT DEFAULT '',
+    referrer TEXT DEFAULT '',
+    user_agent TEXT DEFAULT '',
+    visitor_id TEXT DEFAULT '',
+    created_at INTEGER NOT NULL
+  );
+
   CREATE INDEX IF NOT EXISTS idx_admin_sessions_token ON admin_sessions(token);
   CREATE INDEX IF NOT EXISTS idx_admin_sessions_user_id ON admin_sessions(user_id);
   CREATE INDEX IF NOT EXISTS idx_pages_slug ON pages(slug);
@@ -31,6 +41,9 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_news_status_published ON mlite_news(status, published_at);
   CREATE INDEX IF NOT EXISTS idx_arsip_tahun_kategori ON arsip_dokumen(tahun, kategori);
   CREATE INDEX IF NOT EXISTS idx_settings_module_field ON mlite_settings(module, field);
+  CREATE INDEX IF NOT EXISTS idx_site_visits_created_at ON site_visits(created_at);
+  CREATE INDEX IF NOT EXISTS idx_site_visits_path ON site_visits(path);
+  CREATE INDEX IF NOT EXISTS idx_site_visits_visitor ON site_visits(visitor_id);
 
   -- Compatibility mirror for legacy foreign keys that still reference users(id).
   CREATE TABLE IF NOT EXISTS users (

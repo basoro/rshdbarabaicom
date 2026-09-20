@@ -58,6 +58,22 @@ export function incrementNewsViews(slug: string) {
   });
 }
 
+export type TrackVisitPayload = {
+  path: string;
+  title?: string;
+  referrer?: string;
+  visitorId?: string;
+};
+
+export function trackVisit(payload: TrackVisitPayload, signal?: AbortSignal) {
+  return request<{ ok: boolean }>('/api/public/track-visit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal,
+  });
+}
+
 export function getArchives(params: Record<string, string | number | undefined>) {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -114,6 +130,7 @@ export function adminDashboard(token: string) {
     cards: Array<{ label: string; value: number }>;
     newsByUser: DashboardUserPostStat[];
     newsByMonth: DashboardMonthPostStat[];
+    visitsByMonth: DashboardMonthPostStat[];
     currentUser: AdminUser;
   }>('/api/admin/dashboard', {
     headers: {

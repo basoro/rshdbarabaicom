@@ -8,7 +8,18 @@ type RichHtmlProps = {
 
 export default function RichHtml({ html, className = '' }: RichHtmlProps) {
   const sanitizedHtml = useMemo(() => {
+    const pegawaiToProxy = (path: string) =>
+      `/api/public/media/pegawai?path=${encodeURIComponent(path.replace(/^\/+/, ''))}`;
+
     const normalized = html
+      .replace(
+        /https:\/\/(?:www\.)?rshdbarabai\.(?:com|net)\/(pages\/pegawai\/photo\/[^"' )]+)/gi,
+        (_match, p) => pegawaiToProxy(p),
+      )
+      .replace(
+        /(["'(])\/?(pages\/pegawai\/photo\/[^"' )]+)/g,
+        (_match, prefix, p) => `${prefix}${pegawaiToProxy(p)}`,
+      )
       .replace(
         /https:\/\/www\.rshdbarabai\.com\/(uploads\/[^"' )]+)/g,
         (_match, p) => `/api/public/media/legacy?path=${encodeURIComponent(p)}`,

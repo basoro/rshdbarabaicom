@@ -257,7 +257,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="Layanan Kami"
           title="Layanan unggulan RSHD Barabai"
-          description="Migrasi ini mempertahankan jalur layanan utama dari situs lama agar pengunjung tetap familiar."
+          // description="Migrasi ini mempertahankan jalur layanan utama dari situs lama agar pengunjung tetap familiar."
           centered
         />
         <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -291,7 +291,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="Tim Dokter"
           title="Penanggung jawab pelayanan"
-          description="Data dokter diambil langsung dari database SIMRS untuk menampilkan tenaga medis aktif beserta foto pegawai jika tersedia."
+          // description="Data dokter diambil langsung dari database SIMRS untuk menampilkan tenaga medis aktif beserta foto pegawai jika tersedia."
           centered
         />
         <div className="mt-8 flex items-center justify-end gap-3">
@@ -362,7 +362,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="Berita & Informasi"
           title="Berita dan informasi terbaru"
-          description="Artikel terbaru dibaca langsung dari tabel `mlite_news` sehingga pembaruan CMS otomatis muncul di halaman depan."
+          // description="Artikel terbaru dibaca langsung dari tabel `mlite_news` sehingga pembaruan CMS otomatis muncul di halaman depan."
           centered
         />
         <div className="mt-8 grid gap-5 xl:grid-cols-3">
