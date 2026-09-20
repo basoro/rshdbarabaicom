@@ -748,20 +748,6 @@ async function serveArchiveFile(
   }
 
   const remoteUrl = `${SITE_ORIGIN}/${normalizedPath}`;
-  const isPdf = (row.ekstensi || '').toLowerCase() === 'pdf';
-  const legacyViewerPathMatch = /^arsipdokumen[\\/]/i.test(normalizedPath);
-
-  if (isPdf && mode === 'view') {
-    let viewerUrl: string;
-    if (legacyViewerPathMatch) {
-      viewerUrl = `${SITE_ORIGIN}/arsipdokumen/viewer.php?file=${encodeURIComponent(normalizedPath.split(path.sep).join('/'))}`;
-    } else {
-      viewerUrl = `${SITE_ORIGIN}/viewer.php?file=${encodeURIComponent(normalizedPath.split(path.sep).join('/'))}`;
-    }
-    console.log(`[arsip:view] Legacy PDF #${row.id} → mLITE viewer: ${viewerUrl}`);
-    res.redirect(302, viewerUrl);
-    return;
-  }
 
   try {
     console.log(`[arsip:${mode}] Proxy from mLITE #${row.id}: ${remoteUrl}`);
