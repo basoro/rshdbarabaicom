@@ -1,6 +1,7 @@
 import type {
   AdminUser,
   AdminUserItem,
+  DoctorItem,
   ArchiveItem,
   NewsItem,
   PageItem,
@@ -40,6 +41,10 @@ export function getBootstrap() {
 
 export function getPage(slug: string) {
   return request<PageItem>(`/api/public/pages/${slug}`);
+}
+
+export function getDoctors() {
+  return request<{ items: DoctorItem[]; total: number }>('/api/public/doctors');
 }
 
 export function getNewsList(page = 1) {

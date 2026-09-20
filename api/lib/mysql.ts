@@ -18,7 +18,7 @@ export type DoctorProfile = {
   specialty: string;
   gender: 'L' | 'P' | null;
   photo_path: string | null;
-  photo_url: string;
+  photo_url: string | null;
 };
 
 let pool: mysql.Pool | null = null;
@@ -49,21 +49,23 @@ function resolveDoctorPhotoPath(photoPath: string | null): string | null {
   return photoPath.replace(/^\/+/, '');
 }
 
-function buildDoctorFallback(name: string, specialty: string, gender: 'L' | 'P' | null): string {
-  const slug = encodeURIComponent(
-    name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || `dokter-${gender ?? 'x'}`,
-  );
-  const spec = encodeURIComponent(
-    specialty.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'spesialis',
-  );
-  const g = gender === 'P' ? 'p' : gender === 'L' ? 'l' : 'x';
-  return `/api/public/media/pegawai-fallback?i=${slug}&s=${spec}&g=${g}`;
+function buildDoctorPhotoUrl(photoPath: string): string {
+  if (/^https?:\/\//i.test(photoPath)) {
+    return photoPath;
+  }
+
+  const baseUrl = (process.env.LITE_BASE_URL?.trim() || 'https://simrs.rshdbarabai.com').replace(/\/+$/, '');
+  const configuredPhotoPath = (process.env.LITE_PHOTO_PATH?.trim() || 'webapps/penggajian/pages/pegawai/photo')
+    .replace(/^\/+|\/+$/g, '');
+  const photoPathPrefix = configuredPhotoPath.includes('webapps/penggajian')
+    ? configuredPhotoPath
+    : `webapps/penggajian/${configuredPhotoPath}`;
+  const fileName = photoPath.split('/').pop() || photoPath;
+
+  return `${baseUrl}/${photoPathPrefix}/${encodeURIComponent(fileName)}`;
 }
 
-export async function getFeaturedDoctors(limit = 8): Promise<DoctorProfile[]> {
+export async function getFeaturedDoctors(limit = 8, random = false): Promise<DoctorProfile[]> {
   if (!process.env.MYSQL_HOST || !process.env.MYSQL_USER || !process.env.MYSQL_DATABASE) {
     return [];
   }
@@ -87,9 +89,9 @@ export async function getFeaturedDoctors(limit = 8): Promise<DoctorProfile[]> {
         LEFT JOIN pegawai pn ON d.nip IS NOT NULL AND d.nip != '' AND pn.nik = d.nip
         LEFT JOIN pegawai pm ON pm.nama = d.nm_dokter
         WHERE d.status = '1' AND d.nm_dokter IS NOT NULL AND d.nm_dokter != '-'
-        ORDER BY
-          CASE WHEN COALESCE(pk.photo, pn.photo, pm.photo) IS NOT NULL AND COALESCE(pk.photo, pn.photo, pm.photo) != '' THEN 0 ELSE 1 END,
-          d.nm_dokter ASC
+        ORDER BY ${random
+          ? 'RAND()'
+          : `CASE WHEN COALESCE(pk.photo, pn.photo, pm.photo) IS NOT NULL AND COALESCE(pk.photo, pn.photo, pm.photo) != '' THEN 0 ELSE 1 END, d.nm_dokter ASC`}
         LIMIT ?
       `,
       [limit * 3],
@@ -110,13 +112,21 @@ export async function getFeaturedDoctors(limit = 8): Promise<DoctorProfile[]> {
         specialty: (row.nm_sps || 'Dokter Spesialis').trim(),
         gender: row.jk,
         photo_path: photoPath,
-        photo_url: photoPath
-          ? `/api/public/media/pegawai?path=${encodeURIComponent(photoPath)}`
-          : buildDoctorFallback(row.nm_dokter, row.nm_sps || 'Dokter', row.jk),
+        photo_url: photoPath ? buildDoctorPhotoUrl(photoPath) : null,
       });
     }
 
-    return Array.from(uniqueDoctors.values())
+    const doctors = Array.from(uniqueDoctors.values());
+
+    if (random) {
+      for (let index = doctors.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [doctors[index], doctors[randomIndex]] = [doctors[randomIndex], doctors[index]];
+      }
+      return doctors.slice(0, limit);
+    }
+
+    return doctors
       .sort((left, right) => {
         const leftHasRealPhoto = left.photo_path ? 1 : 0;
         const rightHasRealPhoto = right.photo_path ? 1 : 0;

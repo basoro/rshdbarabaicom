@@ -9,6 +9,7 @@ import AdminNewsPage from '@/pages/AdminNewsPage';
 import AdminPagesPage from '@/pages/AdminPagesPage';
 import AdminSettingsPage from '@/pages/AdminSettingsPage';
 import AdminUsersPage from '@/pages/AdminUsersPage';
+import DoctorPage from '@/pages/DoctorPage';
 import ArchivePage from '@/pages/ArchivePage';
 import HomePage from '@/pages/HomePage';
 import NewsDetailPage from '@/pages/NewsDetailPage';
@@ -43,6 +44,8 @@ export default function App() {
           <Route index element={<HomePage />} />
           <Route path="news" element={<NewsListPage />} />
           <Route path="news/:slug" element={<NewsDetailPage />} />
+          <Route path="dokter" element={<DoctorPage />} />
+          <Route path="profil-dokter" element={<DoctorPage />} />
           <Route path="arsip-dokumen" element={<ArchivePage />} />
           <Route path="dokumenarsip" element={<Navigate to="/arsip-dokumen" replace />} />
           <Route path=":slug" element={<PageContentPage />} />

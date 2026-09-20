@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CalendarDays, Eye, Phone, PlayCircle, Activity, FlaskConical, Stethoscope, Droplets } from 'lucide-react';
 import SectionHeading from '@/components/SectionHeading';
+import DoctorAvatar from '@/components/DoctorAvatar';
 import { formatDate, truncateHtml } from '@/lib/format';
 import { useSiteStore } from '@/store/siteStore';
 
@@ -44,9 +45,6 @@ export default function HomePage() {
   const aboutImage = '/api/public/media/local/about/about-02.jpg';
   const aboutVideoIcon = '/api/public/media/local/png-icon/png-icon-09.png';
   const signatureImage = '/api/public/media/local/png-icon/ttd.png';
-  const doctorPlaceholder =
-    'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=professional%20indonesian%20doctor%20portrait%2C%20white%20coat%2C%20friendly%20hospital%20staff%2C%20green%20medical%20background%2C%20realistic%20editorial%20photography&image_size=portrait_4_3';
-
   useEffect(() => {
     if (!slides.length) return undefined;
 
@@ -321,13 +319,12 @@ export default function HomePage() {
               className="flex h-[540px] min-w-[280px] max-w-[280px] flex-col snap-start overflow-hidden rounded-[1.8rem] border border-slate-100 bg-white shadow-sm shadow-slate-200/40 md:h-[572px] md:min-w-[300px] md:max-w-[300px]"
             >
               <div className="aspect-[4/4.3] overflow-hidden bg-slate-100">
-                <img
-                  src={doctor.photo_url || doctorPlaceholder}
+                <DoctorAvatar
+                  name={doctor.name}
+                  src={doctor.photo_url}
                   alt={doctor.name}
-                  className="h-full w-full object-cover object-[center_15%]"
-                  onError={(event) => {
-                    event.currentTarget.src = doctorPlaceholder;
-                  }}
+                  className="h-full w-full"
+                  imageClassName="object-[center_15%]"
                 />
               </div>
               <div className="flex flex-1 flex-col p-6">

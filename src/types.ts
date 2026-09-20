@@ -55,6 +55,15 @@ export type SiteBootstrap = {
   };
 };
 
+export type DoctorItem = {
+  code: string;
+  name: string;
+  specialty: string;
+  gender: 'L' | 'P' | null;
+  photo_path: string | null;
+  photo_url: string | null;
+};
+
 export type PageItem = {
   id: number;
   title: string;

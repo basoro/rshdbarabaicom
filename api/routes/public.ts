@@ -64,8 +64,6 @@ const router = Router();
 const PUBLIC_NEWS_STATUS = 2;
 const imageFallbackUrl =
   'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=modern%20hospital%20building%20with%20green%20medical%20branding%2C%20clean%20daylight%2C%20realistic%20editorial%20photography&image_size=landscape_16_9';
-const doctorFallbackUrl =
-  'https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=professional%20indonesian%20doctor%20portrait%2C%20white%20coat%2C%20friendly%20hospital%20staff%2C%20green%20medical%20background%2C%20realistic%20editorial%20photography&image_size=portrait_4_3';
 
 function mapNews(row: NewsRow) {
   return {
@@ -150,7 +148,8 @@ router.get('/media/pegawai', async (req: Request, res: Response) => {
   const requestedPath =
     typeof req.query.path === 'string' ? req.query.path.replace(/^\/+/, '') : '';
 
-  if (!requestedPath.startsWith('pages/pegawai/photo/')) {
+  const normalizedPhotoPath = requestedPath.replace(/^webapps\/penggajian\//i, '');
+  if (!normalizedPhotoPath.startsWith('pages/pegawai/photo/')) {
     res.status(400).json({
       success: false,
       error: 'Path foto pegawai tidak valid.',
@@ -159,8 +158,8 @@ router.get('/media/pegawai', async (req: Request, res: Response) => {
   }
 
   const FALLBACK_EXT = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-  const parsedDir = path.dirname(requestedPath);
-  const parsedBase = path.basename(requestedPath, path.extname(requestedPath));
+  const parsedDir = path.dirname(normalizedPhotoPath);
+  const parsedBase = path.basename(normalizedPhotoPath, path.extname(normalizedPhotoPath));
   const originalExt = path.extname(requestedPath).replace(/^\./, '').toLowerCase();
 
   const candidateExts = new Set<string>();
@@ -223,9 +222,15 @@ router.get('/media/pegawai', async (req: Request, res: Response) => {
   }
 
   const baseUrl = process.env.LITE_BASE_URL?.trim() || SITE_ORIGIN;
+  const remotePhotoPaths = [
+    'pages/pegawai/photo',
+    'webapps/penggajian/pages/pegawai/photo',
+  ];
   const candidateUrls: string[] = [];
-  for (const ext of extList) {
-    candidateUrls.push(`${baseUrl}/pages/pegawai/photo/${encodeURIComponent(parsedBase)}.${ext}`);
+  for (const photoDir of remotePhotoPaths) {
+    for (const ext of extList) {
+      candidateUrls.push(`${baseUrl}/${photoDir}/${encodeURIComponent(parsedBase)}.${ext}`);
+    }
   }
   candidateUrls.push(`${baseUrl}/${requestedPath}`);
 
@@ -240,9 +245,9 @@ router.get('/media/pegawai', async (req: Request, res: Response) => {
         },
       });
       if (response.ok) {
+        const contentType = response.headers.get('content-type') || '';
         const buffer = Buffer.from(await response.arrayBuffer());
-        if (buffer.length > 200) {
-          const contentType = response.headers.get('content-type') || 'image/jpeg';
+        if (contentType.startsWith('image/') && buffer.length > 200) {
           res.setHeader('Content-Type', contentType);
           res.setHeader('Cache-Control', 'public, max-age=3600');
           res.setHeader('X-Cache-Proxy', photoUrl);
@@ -250,7 +255,7 @@ router.get('/media/pegawai', async (req: Request, res: Response) => {
           res.send(buffer);
           return;
         }
-        console.log('[media/pegawai] Tiny/empty response from:', photoUrl, '-> skip');
+        console.log('[media/pegawai] Invalid image response from:', photoUrl, contentType, '-> skip');
       }
     } catch (error) {
       console.error('[media/pegawai] Proxy error for:', photoUrl, error instanceof Error ? error.message : String(error));
@@ -259,7 +264,7 @@ router.get('/media/pegawai', async (req: Request, res: Response) => {
 
   const legacyProxy = process.env.LEGACY_PHOTO_PROXY?.trim();
   if (legacyProxy) {
-    const legacyUrl = `${legacyProxy}/pages/pegawai/photo/${encodeURIComponent(parsedBase)}.${originalExt || 'jpg'}`;
+    const legacyUrl = `${legacyProxy}/webapps/penggajian/pages/pegawai/photo/${encodeURIComponent(parsedBase)}.${originalExt || 'jpg'}`;
     try {
       const response = await fetch(legacyUrl, {
         headers: {
@@ -285,12 +290,14 @@ router.get('/media/pegawai', async (req: Request, res: Response) => {
 
   console.log('[media/pegawai] All strategies failed → SVG fallback for:', parsedBase);
   const initials = parsedBase
-    .replace(/[^a-z0-9 ]/gi, ' ')
-    .split(/\s+/)
+    .replace(/[(),]/g, ' ')
+    .split(/[\s_-]+/)
+    .map((word) => word.replace(/\.+$/g, '').trim())
     .filter(Boolean)
+    .filter((word) => !/^(drg?|prof|apt|bidan|perawat)$/i.test(word))
     .slice(0, 2)
-    .map((w) => w.charAt(0).toUpperCase())
-    .join('') || 'RS';
+    .map((word) => word.charAt(0).toUpperCase())
+    .join('') || 'DR';
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 533" preserveAspectRatio="xMidYMid meet">
   <defs>
@@ -327,8 +334,10 @@ router.get('/media/pegawai-fallback', (_req: Request, res: Response) => {
     .filter(Boolean)
     .slice(0, 2);
   const initials = words
+    .map((w) => w.replace(/\.+$/g, '').trim())
+    .filter((w) => !/^(drg?|prof|apt|bidan|perawat)$/i.test(w))
     .map((w) => w.charAt(0).toUpperCase())
-    .join('') || 'RS';
+    .join('') || 'DR';
 
   const primary = gender === 'p' ? '#0ea5e9' : '#059669';
   const primaryDark = gender === 'p' ? '#0284c7' : '#047857';
@@ -408,6 +417,18 @@ router.post('/track-visit', (req: Request, res: Response) => {
   }
 });
 
+router.get('/doctors', async (_req: Request, res: Response) => {
+  const doctors = await getFeaturedDoctors(100);
+
+  res.json({
+    success: true,
+    data: {
+      items: doctors,
+      total: doctors.length,
+    },
+  });
+});
+
 router.get('/bootstrap', async (_req: Request, res: Response) => {
   const settings = getSettingsMap();
   const latestNewsRows = all<NewsRow>(
@@ -435,7 +456,7 @@ router.get('/bootstrap', async (_req: Request, res: Response) => {
     get<{ total: number }>(
       `SELECT COUNT(*) AS total FROM arsip_dokumen WHERE lower(jenis) = lower('Publik')`,
     )?.total ?? 0;
-  const featuredDoctors = await getFeaturedDoctors(20);
+  const featuredDoctors = await getFeaturedDoctors(20, true);
 
   res.json({
     success: true,

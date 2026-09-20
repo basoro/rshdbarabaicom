@@ -239,11 +239,16 @@ export function resolveArchiveUrl(filePath: string): string {
     return filePath;
   }
 
-  if (filePath.startsWith('uploads/') || filePath.startsWith('/uploads/')) {
-    return `/${filePath.replace(/^\/+/, '')}`;
+  const normalizedPath = filePath.replace(/^\/+/, '');
+
+  if (
+    normalizedPath.startsWith('uploads/') ||
+    normalizedPath.startsWith('api/public/media/local/')
+  ) {
+    return `/${normalizedPath}`;
   }
 
-  return `${SITE_ORIGIN}/${filePath.replace(/^\/+/, '')}`;
+  return `${SITE_ORIGIN}/${normalizedPath}`;
 }
 
 export function resolveDoctorPhotoProxy(photoPath: string): string {
