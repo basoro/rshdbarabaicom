@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { Router, type Request, type Response } from 'express';
+import { Router, type NextFunction, type Request, type Response } from 'express';
 import {
   featuredServices,
   heroSlides,
@@ -75,9 +75,15 @@ function mapNews(row: NewsRow) {
   };
 }
 
-router.get('/media/local/:target/:filename', (req: Request, res: Response) => {
+router.get('/media/local/:target/:filename', (req: Request, res: Response, next: NextFunction) => {
   const target = req.params.target.replace(/[^a-z0-9-_]+/gi, '').toLowerCase();
   const filename = path.basename(req.params.filename);
+
+  if (target === 'arsip') {
+    next('route');
+    return;
+  }
+
   const candidatePaths = [
     path.join(localMediaRoot, target, filename),
     path.join(uploadsRoot, target, filename),
@@ -431,16 +437,17 @@ router.get('/doctors', async (_req: Request, res: Response) => {
 
 router.get('/bootstrap', async (_req: Request, res: Response) => {
   const settings = getSettingsMap();
+  const now = Math.floor(Date.now() / 1000);
   const latestNewsRows = all<NewsRow>(
     `
       SELECT n.*, u.fullname AS author_name
       FROM mlite_news n
       LEFT JOIN mlite_users u ON u.id = n.user_id
-      WHERE n.status = ?
+      WHERE n.status = ? AND n.published_at <= ?
       ORDER BY n.published_at DESC, n.id DESC
       LIMIT 3
     `,
-    [PUBLIC_NEWS_STATUS],
+    [PUBLIC_NEWS_STATUS, now],
   );
 
   const latestNews = latestNewsRows.map(mapNews);
@@ -450,8 +457,10 @@ router.get('/bootstrap', async (_req: Request, res: Response) => {
 
   const totalPages = get<{ total: number }>(`SELECT COUNT(*) AS total FROM pages`)?.total ?? 0;
   const totalNews =
-    get<{ total: number }>(`SELECT COUNT(*) AS total FROM mlite_news WHERE status = ?`, [PUBLIC_NEWS_STATUS])
-      ?.total ?? 0;
+    get<{ total: number }>(
+      `SELECT COUNT(*) AS total FROM mlite_news WHERE status = ? AND published_at <= ?`,
+      [PUBLIC_NEWS_STATUS, now],
+    )?.total ?? 0;
   const totalArchives =
     get<{ total: number }>(
       `SELECT COUNT(*) AS total FROM arsip_dokumen WHERE lower(jenis) = lower('Publik')`,
@@ -482,7 +491,7 @@ router.get('/bootstrap', async (_req: Request, res: Response) => {
       contacts: {
         address: 'Jl. Murakata No. 04 Barabai - Kalimantan Selatan',
         email: 'rshd@hstkab.go.id',
-        phone: '0811-800-5050',
+        phone: '0811-800-8080',
         complaintPhone: '0852-4980-8800',
         serviceHours: 'Pagi (08:00 - 11:00) dan Sore (14:00 - 16:00)',
       },
@@ -516,22 +525,25 @@ router.get('/news', (req: Request, res: Response) => {
   const page = Math.max(Number(req.query.page ?? 1), 1);
   const pageSize = Math.min(Math.max(Number(req.query.pageSize ?? 9), 1), 24);
   const offset = (page - 1) * pageSize;
+  const now = Math.floor(Date.now() / 1000);
 
   const rows = all<NewsRow>(
     `
       SELECT n.*, u.fullname AS author_name
       FROM mlite_news n
       LEFT JOIN mlite_users u ON u.id = n.user_id
-      WHERE n.status = ?
+      WHERE n.status = ? AND n.published_at <= ?
       ORDER BY n.published_at DESC, n.id DESC
       LIMIT ? OFFSET ?
     `,
-    [PUBLIC_NEWS_STATUS, pageSize, offset],
+    [PUBLIC_NEWS_STATUS, now, pageSize, offset],
   );
 
   const total =
-    get<{ total: number }>(`SELECT COUNT(*) AS total FROM mlite_news WHERE status = ?`, [PUBLIC_NEWS_STATUS])
-      ?.total ?? 0;
+    get<{ total: number }>(
+      `SELECT COUNT(*) AS total FROM mlite_news WHERE status = ? AND published_at <= ?`,
+      [PUBLIC_NEWS_STATUS, now],
+    )?.total ?? 0;
 
   res.json({
     success: true,
@@ -548,15 +560,16 @@ router.get('/news', (req: Request, res: Response) => {
 });
 
 router.get('/news/:slug', (req: Request, res: Response) => {
+  const now = Math.floor(Date.now() / 1000);
   const row = get<NewsRow>(
     `
       SELECT n.*, u.fullname AS author_name
       FROM mlite_news n
       LEFT JOIN mlite_users u ON u.id = n.user_id
-      WHERE n.slug = ? AND n.status = ?
+      WHERE n.slug = ? AND n.status = ? AND n.published_at <= ?
       LIMIT 1
     `,
-    [req.params.slug, PUBLIC_NEWS_STATUS],
+    [req.params.slug, PUBLIC_NEWS_STATUS, now],
   );
 
   if (!row) {
@@ -572,11 +585,11 @@ router.get('/news/:slug', (req: Request, res: Response) => {
       SELECT n.*, u.fullname AS author_name
       FROM mlite_news n
       LEFT JOIN mlite_users u ON u.id = n.user_id
-      WHERE n.status = ? AND n.id != ?
+      WHERE n.status = ? AND n.published_at <= ? AND n.id != ?
       ORDER BY n.published_at DESC, n.id DESC
       LIMIT 3
     `,
-    [PUBLIC_NEWS_STATUS, row.id],
+    [PUBLIC_NEWS_STATUS, now, row.id],
   );
 
   res.json({
@@ -702,21 +715,52 @@ async function serveArchiveFile(
   const isLocalUploadPath =
     !isExternalUrl &&
     (filePath.startsWith('uploads/') || filePath.startsWith('/uploads/'));
+  const pathHasSlashes = normalizedPath.includes('/') || normalizedPath.includes('\\');
 
-  let localCandidate: string | null = null;
+  const localCandidates: string[] = [];
   if (!isExternalUrl) {
     if (isLocalUploadPath) {
-      localCandidate = path.join(uploadsRoot, filePath.replace(/^\/?uploads\//, ''));
+      localCandidates.push(path.join(uploadsRoot, filePath.replace(/^\/?uploads\//, '')));
     } else {
-      localCandidate = path.join(projectRoot, normalizedPath);
+      localCandidates.push(path.join(projectRoot, normalizedPath));
+    }
+    if (!pathHasSlashes) {
+      localCandidates.push(path.join(uploadsRoot, 'arsip', normalizedPath));
+      localCandidates.push(path.join(uploadsRoot, normalizedPath));
+    }
+    const baseName = path.basename(normalizedPath, path.extname(normalizedPath));
+    const ext = path.extname(normalizedPath).replace(/^\./, '').toLowerCase() || row.ekstensi?.toLowerCase() || 'pdf';
+    const FALLBACK_EXTS = new Set<string>([ext, 'pdf', 'docx', 'xlsx', 'jpg', 'jpeg', 'png', 'gif']);
+    for (const candidate of [...localCandidates]) {
+      const dir = path.dirname(candidate);
+      FALLBACK_EXTS.forEach((e) => {
+        if (!candidate.toLowerCase().endsWith(`.${e}`)) {
+          localCandidates.push(path.join(dir, `${baseName}.${e}`));
+        }
+      });
     }
   }
 
-  if (localCandidate && fs.existsSync(localCandidate)) {
-    res.setHeader('Content-Type', contentType);
+  let localCandidateMatched: string | null = null;
+  for (const candidate of localCandidates) {
+    try {
+      if (candidate && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+        localCandidateMatched = candidate;
+        break;
+      }
+    } catch {
+      // skip
+    }
+  }
+
+  if (localCandidateMatched) {
+    const matchedExt = path.extname(localCandidateMatched).replace(/^\./, '').toLowerCase();
+    const finalContentType = contentTypeMap[matchedExt] || contentType;
+    res.setHeader('Content-Type', finalContentType);
     res.setHeader('Content-Disposition', dispositionHeader);
     res.setHeader('Cache-Control', 'private, max-age=3600');
-    res.sendFile(localCandidate);
+    console.log(`[arsip:${mode}] Serve from local FS: ${localCandidateMatched}`);
+    res.sendFile(localCandidateMatched);
     return;
   }
 
@@ -774,6 +818,78 @@ async function serveArchiveFile(
   }
   res.redirect(302, remoteUrl);
 }
+
+router.get('/media/local/arsip/:filename', (req: Request, res: Response) => {
+  const rawFilename = req.params.filename?.toString() || '';
+  const safeFilename = rawFilename.replace(/^.*[\\/]/, '').replace(/[^a-z0-9-_ .()]+/gi, '_');
+  const forceDownload = typeof req.query.download === 'string' && req.query.download !== '0';
+
+  if (!safeFilename) {
+    res.status(400).json({ success: false, error: 'Filename tidak valid.' });
+    return;
+  }
+
+  const contentTypeMap: Record<string, string> = {
+    pdf: 'application/pdf',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    xls: 'application/vnd.ms-excel',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ppt: 'application/vnd.ms-powerpoint',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    webp: 'image/webp',
+  };
+
+  const matchedExt = path.extname(safeFilename).replace(/^\./, '').toLowerCase();
+  const contentType = contentTypeMap[matchedExt] || 'application/octet-stream';
+  const disposition = forceDownload ? 'attachment' : matchedExt === 'pdf' ? 'inline' : 'attachment';
+  const dispositionHeader = `${disposition}; filename*=UTF-8''${encodeURIComponent(safeFilename)}; filename="${encodeURIComponent(safeFilename)}"`;
+
+  const directPath = path.join(uploadsRoot, 'arsip', safeFilename);
+  try {
+    if (fs.existsSync(directPath) && fs.statSync(directPath).isFile()) {
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', dispositionHeader);
+      res.setHeader('Cache-Control', 'private, max-age=3600');
+      console.log(`[media/local/arsip] Serve local: ${directPath}`);
+      res.sendFile(directPath);
+      return;
+    }
+  } catch {
+    // skip
+  }
+
+  const row = get<ArchiveRow>(
+    `
+      SELECT *
+      FROM arsip_dokumen
+      WHERE (lower(file_path) = lower(?) OR lower(file_path) LIKE lower(?) OR lower(file_path) LIKE lower(?))
+        AND lower(jenis) = lower('Publik')
+      LIMIT 1
+    `,
+    [
+      safeFilename,
+      `%/${safeFilename}`,
+      `%${safeFilename}`,
+    ],
+  );
+
+  if (row) {
+    const redirectRoute = forceDownload ? 'download' : 'view';
+    console.log(`[media/local/arsip] File not local. Redirect to arsip proxy #${row.id}/${redirectRoute}`);
+    res.redirect(302, `/api/public/arsip/${row.id}/${redirectRoute}`);
+    return;
+  }
+
+  res.status(404).json({
+    success: false,
+    error: 'Dokumen arsip tidak ditemukan.',
+  });
+});
 
 router.get('/arsip/:id/view', (req: Request, res: Response) => {
   void serveArchiveFile(req, res, 'view');

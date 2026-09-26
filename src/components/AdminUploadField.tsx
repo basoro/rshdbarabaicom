@@ -46,13 +46,15 @@ export default function AdminUploadField({
   }
 
   return (
-    <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+    <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-white">{label}</p>
-          {helpText ? <p className="mt-1 text-xs text-slate-400">{helpText}</p> : null}
+          <p className="text-sm font-semibold text-slate-900 dark:text-white">{label}</p>
+          {helpText ? (
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{helpText}</p>
+          ) : null}
         </div>
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/15">
           {uploading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {uploading ? 'Mengunggah...' : 'Pilih File'}
           <input
@@ -65,7 +67,7 @@ export default function AdminUploadField({
           />
         </label>
       </div>
-      {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
+      {error ? <p className="mt-3 text-sm text-rose-600 dark:text-rose-300">{error}</p> : null}
     </div>
   );
 }

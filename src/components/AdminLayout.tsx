@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, FileText, LayoutDashboard, LogOut, Newspaper, Settings, Shield, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, LayoutDashboard, LogOut, Moon, Newspaper, Settings, Shield, Sun, Users } from 'lucide-react';
 import { canAccessAdminModule, type AdminModuleKey } from '@/lib/adminAccess';
+import { useTheme } from '@/hooks/useTheme';
 import { useAdminStore } from '@/store/adminStore';
 
 const adminLinks: Array<{
@@ -28,6 +29,8 @@ export default function AdminLayout() {
     }
   });
   const { initialized, initialize, loading, token, user, logout } = useAdminStore();
+  const { toggleTheme, isDark } = useTheme({ storageKey: 'adminTheme', defaultTheme: 'light' });
+  const themeClass = isDark ? 'dark' : '';
 
   useEffect(() => {
     initialize();
@@ -54,10 +57,14 @@ export default function AdminLayout() {
 
   if (!initialized || loading) {
     return (
-      <div className="grid min-h-screen place-items-center bg-slate-950 text-white">
-        <div className="text-center">
-          <p className="text-sm uppercase tracking-[0.4em] text-emerald-300">CMS RSHD</p>
-          <h1 className="mt-4 font-display text-4xl">Memuat panel admin</h1>
+      <div className={themeClass}>
+        <div className="grid min-h-screen place-items-center bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
+          <div className="text-center">
+            <p className="text-sm uppercase tracking-[0.4em] text-emerald-700 dark:text-emerald-300">
+              CMS RSHD
+            </p>
+            <h1 className="mt-4 font-display text-4xl">Memuat panel admin</h1>
+          </div>
         </div>
       </div>
     );
@@ -72,34 +79,41 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className={themeClass}>
+      <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <div
         className={`grid min-h-screen transition-[grid-template-columns] duration-300 ${
           sidebarCollapsed ? 'lg:grid-cols-[88px_1fr]' : 'lg:grid-cols-[280px_1fr]'
         }`}
       >
-        <aside className={`border-r border-white/10 bg-slate-900 px-4 py-8 transition-all duration-300 ${sidebarCollapsed ? 'lg:px-3' : 'lg:px-6'}`}>
+        <aside className={`border-r border-slate-200 bg-white px-4 py-8 transition-all duration-300 dark:border-white/10 dark:bg-slate-900 ${sidebarCollapsed ? 'lg:px-3' : 'lg:px-6'}`}>
           <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
             <Link
               to="/"
               title="Buka situs publik"
-              className={`flex items-center rounded-2xl border border-white/10 bg-white/5 transition hover:bg-white/10 ${sidebarCollapsed ? 'h-12 w-12 justify-center' : 'gap-3 px-4 py-3'}`}
+              className={`flex items-center rounded-[2rem] border border-slate-200 bg-slate-50 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 ${sidebarCollapsed ? 'h-12 w-12 justify-center' : 'gap-2 px-4 py-3'}`}
             >
-              <span className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-300">CMS</span>
-              {!sidebarCollapsed ? <span className="font-display text-2xl text-white">RSHD</span> : null}
+              {sidebarCollapsed ? (
+              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-300">CMS</span>
+            ) : (
+              <>
+                <span className="text-[12px] font-bold uppercase tracking-[0.35em] text-emerald-700 dark:text-emerald-300">CMS</span>
+                <span className="font-display text-3xl text-slate-900 dark:text-white">RSHD</span>
+              </>
+            )}
             </Link>
             <button
               type="button"
               onClick={() => setSidebarCollapsed((current) => !current)}
               title={sidebarCollapsed ? 'Buka sidebar' : 'Ciutkan sidebar'}
               aria-label={sidebarCollapsed ? 'Buka sidebar' : 'Ciutkan sidebar'}
-              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 text-slate-300 transition hover:bg-white/10 hover:text-white ${sidebarCollapsed ? 'hidden' : ''}`}
+              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white ${sidebarCollapsed ? 'hidden' : ''}`}
             >
               {sidebarCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
             </button>
           </div>
           {!sidebarCollapsed ? (
-            <p className="mt-3 px-1 text-xs leading-5 text-slate-400">Manajemen website dan konten rumah sakit</p>
+            <p className="mt-3 px-1 text-sm text-slate-600 dark:text-slate-400">Manajemen website dan konten rumah sakit</p>
           ) : null}
           {sidebarCollapsed ? (
             <button
@@ -107,7 +121,7 @@ export default function AdminLayout() {
               onClick={() => setSidebarCollapsed(false)}
               title="Buka sidebar"
               aria-label="Buka sidebar"
-              className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-xl border border-white/10 text-slate-300 transition hover:bg-white/10 hover:text-white"
+              className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
@@ -125,7 +139,9 @@ export default function AdminLayout() {
                   aria-label={sidebarCollapsed ? item.label : undefined}
                   className={({ isActive }) =>
                     `flex items-center rounded-2xl py-3 text-sm font-medium transition ${sidebarCollapsed ? 'justify-center px-3' : 'gap-3 px-4'} ${
-                      isActive ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                      isActive
+                        ? 'bg-emerald-600 text-white'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white'
                     }`
                   }
                 >
@@ -138,22 +154,35 @@ export default function AdminLayout() {
         </aside>
 
         <div className="flex min-h-screen flex-col">
-          <header className="border-b border-white/10 bg-slate-950/80 px-6 py-5 backdrop-blur">
+          <header className="border-b border-slate-200 bg-white/80 px-6 py-5 backdrop-blur dark:border-white/10 dark:bg-slate-950/80">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm uppercase tracking-[0.35em] text-emerald-300">Administrator</p>
-                <h2 className="mt-2 font-display text-4xl text-white">
+                <p className="text-[12px] uppercase tracking-[0.35em] text-emerald-700 dark:text-emerald-300">
+                  Administrator
+                </p>
+                <h2 className="mt-2 font-display text-2xl text-slate-900 dark:text-white">
                   {user.fullname || user.username}
                 </h2>
               </div>
-              <button
-                type="button"
-                onClick={() => logout()}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/5"
-              >
-                <LogOut className="h-4 w-4" />
-                Keluar
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  aria-label={isDark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'}
+                  title={isDark ? 'Mode terang' : 'Mode gelap'}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 text-slate-700 transition hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-white/5"
+                >
+                  {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => logout()}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-white/5"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Keluar
+                </button>
+              </div>
             </div>
           </header>
 
@@ -162,6 +191,7 @@ export default function AdminLayout() {
           </main>
         </div>
       </div>
+    </div>
     </div>
   );
 }

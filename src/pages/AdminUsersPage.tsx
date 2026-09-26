@@ -50,7 +50,7 @@ function UserAvatar({
 
   return (
     <div
-      className={`grid place-items-center overflow-hidden bg-emerald-500/15 text-emerald-200 ${className}`}
+      className={`grid place-items-center overflow-hidden bg-emerald-500/15 text-emerald-700 dark:text-emerald-200 ${className}`}
     >
       {avatar && !imageError ? (
         <img
@@ -173,11 +173,13 @@ export default function AdminUsersPage() {
 
   return (
     <div className="grid gap-6 2xl:grid-cols-[360px_1fr]">
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5">
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-emerald-300">Pengguna</p>
-            <h1 className="mt-2 font-display text-4xl text-white">Akun CMS</h1>
+            <p className="text-[12px] uppercase tracking-[0.35em] text-emerald-700 dark:text-emerald-300">
+              Pengguna
+            </p>
+            <h1 className="mt-2 font-display text-3xl text-slate-900 dark:text-white">Akun CMS</h1>
           </div>
           <button
             type="button"
@@ -200,7 +202,7 @@ export default function AdminUsersPage() {
               className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
                 selectedId === item.id
                   ? 'border-emerald-400 bg-emerald-500/15'
-                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+                  : 'border-slate-200 bg-white hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10'
               }`}
             >
               <div className="flex items-start gap-3">
@@ -210,11 +212,13 @@ export default function AdminUsersPage() {
                   username={item.username}
                 />
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-white">
+                  <p className="truncate font-semibold text-[14px] text-slate-900 dark:text-white">
                     {item.fullname || item.username}
                   </p>
-                  <p className="mt-1 truncate text-sm text-slate-400">@{item.username}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-emerald-300">
+                  <p className="mt-1 truncate text-[14px] text-slate-500 dark:text-slate-400">
+                    @{item.username}
+                  </p>
+                  <p className="mt-1 text-[12px] uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">
                     {item.role}
                   </p>
                 </div>
@@ -224,42 +228,42 @@ export default function AdminUsersPage() {
         </div>
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
         <div className="grid gap-4 md:grid-cols-2">
           <input
             value={form.username}
             onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
             placeholder="Username"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
           />
           <input
             value={form.fullname || ''}
             onChange={(event) => setForm((current) => ({ ...current, fullname: event.target.value }))}
             placeholder="Nama lengkap"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
           />
           <input
             type="email"
             value={form.email}
             onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
             placeholder="Email"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
           />
           <input
             type="password"
             value={form.password || ''}
             onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
             placeholder={form.id ? 'Password baru (opsional)' : 'Password'}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
           />
           <input
             value={form.role}
             onChange={(event) => setForm((current) => ({ ...current, role: event.target.value }))}
             placeholder="Role"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
           />
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700 dark:text-emerald-300">
               Reset password
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -275,7 +279,7 @@ export default function AdminUsersPage() {
                 type="button"
                 onClick={copyPassword}
                 disabled={!form.password}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold text-slate-200 disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 disabled:opacity-40 dark:border-white/10 dark:text-slate-200"
               >
                 <Copy className="h-4 w-4" />
                 {copyState === 'done'
@@ -285,7 +289,7 @@ export default function AdminUsersPage() {
                     : 'Copy'}
               </button>
             </div>
-            <p className="mt-3 text-xs leading-6 text-slate-400">
+            <p className="mt-3 text-xs leading-6 text-slate-600 dark:text-slate-400">
               Password hanya diubah saat field password terisi lalu pengguna disimpan.
             </p>
           </div>
@@ -293,18 +297,18 @@ export default function AdminUsersPage() {
             value={form.cap || ''}
             onChange={(event) => setForm((current) => ({ ...current, cap: event.target.value }))}
             placeholder="Capability"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring md:col-span-2"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring md:col-span-2"
           />
           <input
             value={form.avatar}
             onChange={(event) => setForm((current) => ({ ...current, avatar: event.target.value }))}
             placeholder="URL avatar"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring md:col-span-2"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring md:col-span-2"
           />
         </div>
 
-        <div className="mt-4 rounded-[2rem] border border-white/10 bg-slate-950/40 px-5 py-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">
+        <div className="mt-4 rounded-[2rem] border border-slate-200 bg-slate-100 px-5 py-5 dark:border-white/10 dark:bg-slate-950/40">
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-300">
             Preview avatar
           </p>
           <div className="mt-4 flex items-center gap-4">
@@ -316,17 +320,17 @@ export default function AdminUsersPage() {
               iconClassName="h-7 w-7"
               textClassName="text-lg font-semibold"
             />
-            <div className="text-sm leading-6 text-slate-400">
+            <div className="text-sm leading-6 text-slate-600 dark:text-slate-400">
               Placeholder otomatis dipakai jika URL avatar kosong atau gambar gagal dimuat.
             </div>
           </div>
         </div>
 
-        <div className="mt-4 rounded-[2rem] border border-white/10 bg-slate-950/40 px-5 py-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">
+        <div className="mt-4 rounded-[2rem] border border-slate-200 bg-slate-100 px-5 py-5 dark:border-white/10 dark:bg-slate-950/40">
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-300">
             Hak akses per modul
           </p>
-          <p className="mt-2 text-sm leading-7 text-slate-400">
+          <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-400">
             Pilih menu yang boleh dibuka pengguna ini. Dashboard selalu aktif agar pengguna
             tetap bisa masuk ke panel admin.
           </p>
@@ -351,7 +355,7 @@ export default function AdminUsersPage() {
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                     active
                       ? 'bg-emerald-500 text-white'
-                      : 'bg-white/10 text-slate-300 hover:bg-white/15'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/15'
                   } ${locked ? 'cursor-not-allowed opacity-90' : ''}`}
                 >
                   {module.label}
@@ -396,7 +400,7 @@ export default function AdminUsersPage() {
             Simpan Pengguna
           </button>
           {form.password ? (
-            <span className="inline-flex items-center gap-2 rounded-2xl border border-emerald-400/25 px-4 py-3 text-sm text-emerald-200">
+            <span className="inline-flex items-center gap-2 rounded-2xl border border-emerald-300 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-400/25 dark:text-emerald-200">
               <KeyRound className="h-4 w-4" />
               Password baru siap diterapkan saat disimpan
             </span>
@@ -406,7 +410,7 @@ export default function AdminUsersPage() {
               type="button"
               onClick={handleDelete}
               disabled={isCurrentUser}
-              className="inline-flex items-center gap-2 rounded-2xl border border-rose-400/30 px-5 py-3 text-sm font-semibold text-rose-200 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-2xl border border-rose-300 px-5 py-3 text-sm font-semibold text-rose-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-rose-400/30 dark:text-rose-200"
             >
               <Trash2 className="h-4 w-4" />
               {isCurrentUser ? 'Tidak bisa hapus akun aktif' : 'Hapus'}

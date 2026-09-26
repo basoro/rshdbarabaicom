@@ -37,7 +37,7 @@ function ToolbarButton({ label, onClick, children }: ToolbarButtonProps) {
       title={label}
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-200 transition hover:bg-white/10 hover:text-white"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 dark:hover:text-white"
     >
       {children}
     </button>
@@ -95,25 +95,27 @@ export default function AdminRichTextEditor({
   }
 
   return (
-    <div className="rounded-[2rem] border border-white/10 bg-slate-950/80">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-4">
+    <div className="rounded-[2rem] border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950/80">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 dark:border-white/10">
         <div>
           {label ? (
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-300">
               {label}
             </p>
           ) : null}
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
             Mode visual tetap menyimpan HTML, dan mode HTML memberi kontrol langsung bila diperlukan.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex rounded-2xl border border-white/10 bg-white/5 p-1">
+          <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1 dark:border-white/10 dark:bg-white/5">
             <button
               type="button"
               onClick={() => setMode('visual')}
               className={`rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition ${
-                mode === 'visual' ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:text-white'
+                mode === 'visual'
+                  ? 'bg-emerald-600 text-white'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
               }`}
             >
               Visual
@@ -122,7 +124,9 @@ export default function AdminRichTextEditor({
               type="button"
               onClick={() => setMode('html')}
               className={`rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition ${
-                mode === 'html' ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:text-white'
+                mode === 'html'
+                  ? 'bg-emerald-600 text-white'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
               }`}
             >
               HTML
@@ -133,8 +137,8 @@ export default function AdminRichTextEditor({
             onClick={() => setShowPreview((current) => !current)}
             className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition ${
               showPreview
-                ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-200'
-                : 'border-white/10 bg-white/5 text-slate-300 hover:text-white'
+                ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-200'
+                : 'border-slate-200 bg-white text-slate-600 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:text-white'
             }`}
           >
             <MonitorPlay className="h-4 w-4" />
@@ -147,7 +151,7 @@ export default function AdminRichTextEditor({
         <div>
           {mode === 'visual' ? (
             <>
-              <div className="flex flex-wrap gap-2 border-b border-white/10 px-4 py-3">
+              <div className="flex flex-wrap gap-2 border-b border-slate-200 px-4 py-3 dark:border-white/10">
                 <ToolbarButton label="Bold" onClick={() => runCommand('bold')}>
                   <Bold className="h-4 w-4" />
                 </ToolbarButton>
@@ -192,7 +196,7 @@ export default function AdminRichTextEditor({
                 suppressContentEditableWarning
                 onInput={(event) => onChange(event.currentTarget.innerHTML)}
                 data-placeholder={placeholder}
-                className={`${minHeightClassName} prose prose-invert max-w-none px-5 py-5 text-sm leading-7 text-white outline-none [&:empty:before]:pointer-events-none [&:empty:before]:text-slate-500 [&:empty:before]:content-[attr(data-placeholder)] [&_blockquote]:border-l-4 [&_blockquote]:border-emerald-500 [&_blockquote]:pl-4 [&_h2]:font-display [&_h2]:text-3xl [&_h2]:text-white [&_h3]:font-display [&_h3]:text-2xl [&_h3]:text-white [&_img]:rounded-2xl`}
+                className={`${minHeightClassName} prose prose-invert max-w-none px-5 py-5 text-sm leading-7 text-slate-900 outline-none [&:empty:before]:pointer-events-none [&:empty:before]:text-slate-500 [&:empty:before]:content-[attr(data-placeholder)] [&_blockquote]:border-l-4 [&_blockquote]:border-emerald-500 [&_blockquote]:pl-4 [&_h2]:font-display [&_h2]:text-3xl [&_h2]:text-slate-900 dark:[&_h2]:text-white [&_h3]:font-display [&_h3]:text-2xl [&_h3]:text-slate-900 dark:[&_h3]:text-white [&_img]:rounded-2xl dark:text-white`}
               />
             </>
           ) : (
@@ -200,24 +204,24 @@ export default function AdminRichTextEditor({
               value={value}
               onChange={(event) => onChange(event.target.value)}
               placeholder={placeholder}
-              className={`${minHeightClassName} w-full bg-transparent px-5 py-5 text-sm leading-7 text-white outline-none`}
+              className={`${minHeightClassName} w-full bg-transparent px-5 py-5 text-sm leading-7 text-slate-900 outline-none dark:text-white`}
             />
           )}
         </div>
 
         {showPreview ? (
-          <div className="border-t border-white/10 bg-white/[0.02] lg:border-l lg:border-t-0">
-            <div className="border-b border-white/10 px-5 py-4">
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">
+          <div className="border-t border-slate-200 bg-slate-50 lg:border-l lg:border-t-0 dark:border-white/10 dark:bg-white/[0.02]">
+            <div className="border-b border-slate-200 px-5 py-4 dark:border-white/10">
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-300">
                 Preview
               </p>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                 Tampilan ini ikut berubah saat Anda mengetik atau mengedit HTML.
               </p>
             </div>
             <RichHtml
               html={value || '<p class="text-slate-500">Preview akan muncul setelah konten diisi.</p>'}
-              className={`${minHeightClassName} prose prose-invert px-5 py-5 text-sm leading-7 text-slate-100 [&_blockquote]:border-l-4 [&_blockquote]:border-emerald-500 [&_blockquote]:pl-4 [&_img]:rounded-2xl`}
+              className={`${minHeightClassName} prose prose-invert px-5 py-5 text-sm leading-7 text-slate-700 [&_blockquote]:border-l-4 [&_blockquote]:border-emerald-500 [&_blockquote]:pl-4 [&_img]:rounded-2xl dark:text-slate-100`}
             />
           </div>
         ) : null}

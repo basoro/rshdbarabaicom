@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import SiteFooter from '@/components/SiteFooter';
 import SiteHeader from '@/components/SiteHeader';
+import SurveyPopup from '@/components/SurveyPopup';
 import useTrackVisit from '@/hooks/useTrackVisit';
 import { useSiteStore } from '@/store/siteStore';
 
@@ -43,6 +44,7 @@ export default function PublicLayout() {
         menu={bootstrap.menu}
         siteName={bootstrap.settings.nama_instansi || 'RSUD H. Damanhuri'}
       />
+      <SurveyPopup />
       <main>
         <Outlet />
       </main>

@@ -28,6 +28,38 @@ const emptyNews: NewsForm = {
   published_at: Math.floor(Date.now() / 1000),
 };
 
+function padTwo(value: number) {
+  return String(value).padStart(2, '0');
+}
+
+/** Konversi unix timestamp (detik) -> value input datetime-local (waktu lokal browser). */
+function toDatetimeLocalValue(timestamp?: number | null) {
+  const seconds = Number(timestamp || 0);
+  const date = seconds > 0 ? new Date(seconds * 1000) : new Date();
+  return `${date.getFullYear()}-${padTwo(date.getMonth() + 1)}-${padTwo(date.getDate())}T${padTwo(
+    date.getHours(),
+  )}:${padTwo(date.getMinutes())}`;
+}
+
+/** Konversi value input datetime-local (dianggap waktu lokal) -> unix timestamp (detik). */
+function fromDatetimeLocalValue(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value.trim());
+  if (!match) return Math.floor(Date.now() / 1000);
+
+  const date = new Date(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+    Number(match[4]),
+    Number(match[5]),
+    0,
+    0,
+  );
+
+  if (Number.isNaN(date.getTime())) return Math.floor(Date.now() / 1000);
+  return Math.floor(date.getTime() / 1000);
+}
+
 function buildNewsPayload(form: NewsForm) {
   return {
     id: form.id,
@@ -176,11 +208,13 @@ export default function AdminNewsPage() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5">
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-emerald-300">Berita</p>
-            <h1 className="mt-2 font-display text-4xl text-white">Artikel</h1>
+            <p className="text-[12px] uppercase tracking-[0.35em] text-emerald-700 dark:text-emerald-300">
+              Berita
+            </p>
+            <h1 className="mt-2 font-display text-3xl text-slate-900 dark:text-white">Artikel</h1>
           </div>
           <button
             type="button"
@@ -191,13 +225,13 @@ export default function AdminNewsPage() {
           </button>
         </div>
 
-        <label className="mt-6 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-          <Search className="h-4 w-4 text-slate-400" />
+        <label className="mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-white/5">
+          <Search className="h-4 w-4 text-slate-500 dark:text-slate-400" />
           <input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Cari judul atau slug berita"
-            className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+            className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500"
           />
         </label>
 
@@ -210,15 +244,15 @@ export default function AdminNewsPage() {
               className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
                 selectedId === item.id
                   ? 'border-emerald-400 bg-emerald-500/15'
-                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+                  : 'border-slate-200 bg-white hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10'
               }`}
             >
-              <p className="font-semibold text-white">{item.title}</p>
-              <p className="mt-1 text-sm text-slate-400">{formatDate(item.published_at)}</p>
+              <p className="font-semibold text-[14px] text-slate-900 dark:text-white">{item.title}</p>
+              <p className="mt-1 text-[12px] text-slate-500 dark:text-slate-400">{formatDate(item.published_at)}</p>
             </button>
           ))}
           {!paginatedItems.length ? (
-            <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-slate-400">
+            <div className="rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500 dark:border-white/10 dark:text-slate-400">
               {searchQuery ? 'Tidak ada berita yang cocok dengan pencarian.' : 'Belum ada berita.'}
             </div>
           ) : null}
@@ -233,37 +267,37 @@ export default function AdminNewsPage() {
         />
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
         <div className="grid gap-4 md:grid-cols-2">
           <input
             value={form.title || ''}
             onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
             placeholder="Judul berita"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring md:col-span-2"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring md:col-span-2"
           />
           <input
             value={form.slug || ''}
             onChange={(event) => setForm((current) => ({ ...current, slug: event.target.value }))}
             placeholder="Slug"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
           />
           <input
             value={form.cover_photo || ''}
             onChange={(event) => setForm((current) => ({ ...current, cover_photo: event.target.value }))}
             placeholder="Nama file cover atau URL"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
           />
-          <div className="rounded-[2rem] border border-white/10 bg-slate-950/40 px-5 py-5">
+          <div className="rounded-[2rem] border border-slate-200 bg-slate-100 px-5 py-5 dark:border-white/10 dark:bg-slate-950/40">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-300">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700 dark:text-emerald-300">
                 Preview cover
               </p>
-              <span className="text-xs text-slate-400">
-                Sumber: kolom <span className="font-semibold text-slate-200">cover_photo</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
+                Sumber: kolom <span className="font-semibold text-slate-700 dark:text-slate-200">cover_photo</span>
               </span>
             </div>
             <div className="mt-4 flex items-start gap-4">
-              <div className="relative h-28 w-44 shrink-0 overflow-hidden rounded-3xl border border-white/10 bg-slate-900">
+              <div className="relative h-28 w-44 shrink-0 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-slate-900">
                 <img
                   src={previewCoverUrl}
                   alt={form.title || 'Cover berita'}
@@ -273,21 +307,21 @@ export default function AdminNewsPage() {
                   }}
                 />
               </div>
-              <div className="min-w-0 flex-1 space-y-2 text-sm leading-6 text-slate-400">
+              <div className="min-w-0 flex-1 space-y-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 <p>
                   <span className="inline-flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4 text-emerald-300" />
+                    <ImageIcon className="h-4 w-4 text-emerald-700 dark:text-emerald-300" />
                     Path cover
                   </span>
                 </p>
-                <p className="break-all rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-300">
+                <p className="break-all rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
                   {form.cover_photo || <span className="text-slate-500">(belum diisi — pakai fallback)</span>}
                 </p>
                 <p className="text-xs leading-5">
-                  Nilai di kolom <span className="font-semibold text-slate-200">cover_photo</span> akan digabung
-                  dengan <span className="font-semibold text-slate-200">IMAGE_URL</span> dan{' '}
-                  <span className="font-semibold text-slate-200">IMAGE_PATH</span> dari file{' '}
-                  <span className="font-semibold text-emerald-200">.env</span>.
+                  Nilai di kolom <span className="font-semibold text-slate-700 dark:text-slate-200">cover_photo</span> akan digabung
+                  dengan <span className="font-semibold text-slate-700 dark:text-slate-200">IMAGE_URL</span> dan{' '}
+                  <span className="font-semibold text-slate-700 dark:text-slate-200">IMAGE_PATH</span> dari file{' '}
+                  <span className="font-semibold text-emerald-700 dark:text-emerald-200">.env</span>.
                 </p>
               </div>
             </div>
@@ -304,23 +338,47 @@ export default function AdminNewsPage() {
         </div>
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <select
-            value={form.status ?? 2}
-            onChange={(event) => setForm((current) => ({ ...current, status: Number(event.target.value) }))}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
-          >
-            <option value={1}>Draft</option>
-            <option value={2}>Publikasi</option>
-          </select>
-          <input
-            type="number"
-            value={form.published_at || Math.floor(Date.now() / 1000)}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, published_at: Number(event.target.value) }))
-            }
-            placeholder="Unix timestamp publish"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
-          />
+          <div>
+            <label
+              htmlFor="news-status"
+              className="block text-sm font-semibold text-slate-900 dark:text-white"
+            >
+              Status
+            </label>
+            <select
+              id="news-status"
+              value={form.status ?? 2}
+              onChange={(event) => setForm((current) => ({ ...current, status: Number(event.target.value) }))}
+              className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
+            >
+              <option value={1}>Draft</option>
+              <option value={2}>Publikasi</option>
+            </select>
+          </div>
+          <div>
+            <label
+              htmlFor="news-published-at"
+              className="block text-sm font-semibold text-slate-900 dark:text-white"
+            >
+              Tanggal Rilis / Publikasi
+            </label>
+            <input
+              id="news-published-at"
+              type="datetime-local"
+              value={toDatetimeLocalValue(form.published_at)}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  published_at: fromDatetimeLocalValue(event.target.value),
+                }))
+              }
+              className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
+            />
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+              Menentukan kapan berita mulai tayang di halaman publik — terpisah dari kapan data ini diinput.
+              Tanggal mendatang akan tayang otomatis saat waktunya tiba.
+            </p>
+          </div>
         </div>
 
         <div className="mt-5">
@@ -362,7 +420,7 @@ export default function AdminNewsPage() {
 
         <div className="mt-5 flex flex-wrap gap-3">
           {saveError ? (
-            <div className="w-full rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+            <div className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-100">
               {saveError}
             </div>
           ) : null}
@@ -378,7 +436,7 @@ export default function AdminNewsPage() {
             <button
               type="button"
               onClick={deleteNews}
-              className="inline-flex items-center gap-2 rounded-2xl border border-rose-400/30 px-5 py-3 text-sm font-semibold text-rose-200"
+              className="inline-flex items-center gap-2 rounded-2xl border border-rose-300 px-5 py-3 text-sm font-semibold text-rose-600 dark:border-rose-400/30 dark:text-rose-200"
             >
               <Trash2 className="h-4 w-4" />
               Hapus

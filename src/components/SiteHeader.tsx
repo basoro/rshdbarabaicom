@@ -38,7 +38,7 @@ function DropdownItem({ item, parentLabel }: { item: MenuItem; parentLabel: stri
   };
 
   const linkClass =
-    'flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm text-slate-600 transition hover:bg-[#fff3f8] hover:text-[#b73567]';
+    'flex items-center justify-between gap-3 rounded-2xl px-4 py-2.5 text-[13.5px] text-slate-600 transition hover:bg-[#fff3f8] hover:text-[#b73567]';
 
   if (hasChildren) {
     return (
@@ -46,12 +46,12 @@ function DropdownItem({ item, parentLabel }: { item: MenuItem; parentLabel: stri
         {external ? (
           <a href={url} target="_blank" rel="noreferrer" className={linkClass}>
             <span>{item.label}</span>
-            <span className="text-sm text-slate-400">›</span>
+            <span className="text-[13px] text-slate-400">›</span>
           </a>
         ) : (
           <NavLink to={url} className={linkClass}>
             <span>{item.label}</span>
-            <span className="text-sm text-slate-400">›</span>
+            <span className="text-[13px] text-slate-400">›</span>
           </NavLink>
         )}
         <div
@@ -73,7 +73,7 @@ function DropdownItem({ item, parentLabel }: { item: MenuItem; parentLabel: stri
       href={url}
       target="_blank"
       rel="noreferrer"
-      className="block rounded-2xl px-4 py-3 text-sm text-slate-600 transition hover:bg-[#fff3f8] hover:text-[#b73567]"
+      className="block rounded-2xl px-4 py-2.5 text-[13.5px] text-slate-600 transition hover:bg-[#fff3f8] hover:text-[#b73567]"
     >
       {item.label}
     </a>
@@ -81,7 +81,7 @@ function DropdownItem({ item, parentLabel }: { item: MenuItem; parentLabel: stri
     <NavLink
       key={keyBase}
       to={url}
-      className="block rounded-2xl px-4 py-3 text-sm text-slate-600 transition hover:bg-[#fff3f8] hover:text-[#b73567]"
+      className="block rounded-2xl px-4 py-2.5 text-[13.5px] text-slate-600 transition hover:bg-[#fff3f8] hover:text-[#b73567]"
     >
       {item.label}
     </NavLink>
@@ -112,12 +112,12 @@ function HeaderMenu({ item }: { item: MenuItem }) {
       <div className="relative pb-2" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         <button
           type="button"
-          className={`inline-flex items-center gap-1 px-3 py-3 text-[15px] font-semibold transition ${
+          className={`inline-flex items-center gap-1 px-3 py-2.5 text-[14px] font-semibold transition ${
             isOpen ? 'text-[#c74378]' : 'text-slate-700 hover:text-[#c74378]'
           }`}
         >
           {item.label}
-          <span className={`text-base leading-none transition-transform duration-200 ${isOpen ? 'rotate-45' : ''}`}>
+          <span className={`text-[13px] leading-none transition-transform duration-200 ${isOpen ? 'rotate-45' : ''}`}>
             +
           </span>
         </button>
@@ -137,7 +137,7 @@ function HeaderMenu({ item }: { item: MenuItem }) {
   const url = resolveItemUrl(item);
   const external = url.startsWith('http');
   const className =
-    'inline-flex items-center px-3 py-3 text-[15px] font-semibold text-slate-700 transition hover:text-[#c74378]';
+    'inline-flex items-center px-3 py-2.5 text-[14px] font-semibold text-slate-700 transition hover:text-[#c74378]';
 
   return (
     <div className="relative pb-2">
@@ -160,7 +160,7 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-40 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
       <div className="border-b border-slate-100 bg-white text-slate-500">
-        <div className="container flex flex-wrap items-center justify-between gap-3 py-2 text-[11px] md:text-xs">
+        <div className="container flex flex-wrap items-center justify-between gap-3 py-2 text-[10.5px] md:text-[11.5px]">
           <div className="flex flex-wrap items-center gap-4">
             <span>Jl. Murakata No. 04 Barabai, Kalimantan Selatan</span>
             <span>rshd@hstkab.go.id</span>
@@ -178,8 +178,8 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
               <img src="/favicon.ico" alt={siteName} className="h-11 w-11 object-contain" />
             </div>
             <div>
-              <p className="font-display text-3xl leading-none text-slate-900 md:text-4xl">{siteName}</p>
-              <p className="mt-1 text-[11px] uppercase tracking-[0.32em] text-emerald-700 md:text-xs">
+              <p className="font-display text-[28px] leading-none text-slate-900 md:text-[34px]">{siteName}</p>
+              <p className="mt-1 text-[10.5px] uppercase tracking-[0.30em] text-emerald-700 md:text-[11.5px]">
                 Smart, Green and Friendly Hospital
               </p>
             </div>
@@ -195,12 +195,12 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
         </button>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <div className="rounded-[1.75rem] border border-slate-100 bg-slate-50 px-5 py-3">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-800">
-              <Clock3 className="h-4 w-4" />
+          <div className="rounded-[1.75rem] border border-slate-100 bg-slate-50 px-5 py-2.5">
+            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-800">
+              <Clock3 className="h-3.5 w-3.5" />
               Jam Pelayanan
             </p>
-            <p className="mt-1 text-sm text-slate-600">08:00 - 11:00 • 14:00 - 16:00</p>
+            <p className="mt-1 text-[13px] text-slate-600">08:00 - 11:00 • 14:00 - 16:00</p>
           </div>
           {/* <Link
             to="/admin/login"
@@ -212,7 +212,7 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
             href="https://play.google.com/store/apps/details?id=com.rshdbarabai.apam"
             target="_blank"
             rel="noreferrer"
-            className="rounded-full bg-[#d84f86] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#d84f86]/25 transition hover:bg-[#c43d72]"
+            className="rounded-full bg-[#d84f86] px-6 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-[#d84f86]/25 transition hover:bg-[#c43d72]"
           >
             Daftar
           </a>
@@ -225,10 +225,17 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
               <HeaderMenu key={item.label} item={item} />
             ))}
           </nav>
-          <div className="shrink-0 flex items-center gap-2 rounded-full bg-[#fff3f8] px-4 py-2 text-sm text-[#b73567]">
-            <Phone className="h-4 w-4" />
-            0811-800-5050
-          </div>
+          <a
+            href="https://wa.me/628118008080"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Chat WhatsApp RSUD H. Damanhuri Barabai"
+            aria-label="Chat WhatsApp RSUD H. Damanhuri Barabai"
+            className="group shrink-0 flex items-center gap-2 rounded-full bg-[#fff3f8] px-4 py-2 text-[13px] text-[#b73567] no-underline transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#ffe9f1] hover:shadow-[0_8px_20px_-8px_rgba(183,53,103,0.35)] active:translate-y-0"
+          >
+            <Phone className="h-3.5 w-3.5 transition-transform duration-200 ease-out group-hover:scale-110" />
+            0811-800-8080
+          </a>
         </div>
       </div>
 
@@ -242,7 +249,7 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
                     href={resolveItemUrl(item)}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-sm font-semibold text-slate-900"
+                    className="text-[14px] font-semibold text-slate-900"
                     onClick={() => setMobileOpen(false)}
                   >
                     {item.label}
@@ -250,7 +257,7 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
                 ) : (
                   <Link
                     to={resolveItemUrl(item)}
-                    className="text-sm font-semibold text-slate-900"
+                    className="text-[14px] font-semibold text-slate-900"
                     onClick={() => setMobileOpen(false)}
                   >
                     {item.label}
@@ -265,7 +272,7 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
                           href={resolveItemUrl(child)}
                           target="_blank"
                           rel="noreferrer"
-                          className="rounded-2xl bg-slate-50 px-3 py-2 text-sm text-slate-600"
+                          className="rounded-2xl bg-slate-50 px-3 py-2 text-[13px] text-slate-600"
                           onClick={() => setMobileOpen(false)}
                         >
                           {child.label}
@@ -274,7 +281,7 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
                         <Link
                           key={child.label}
                           to={resolveItemUrl(child)}
-                          className="rounded-2xl bg-slate-50 px-3 py-2 text-sm text-slate-600"
+                          className="rounded-2xl bg-slate-50 px-3 py-2 text-[13px] text-slate-600"
                           onClick={() => setMobileOpen(false)}
                         >
                           {child.label}
@@ -287,7 +294,7 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
             ))}
             <Link
               to="/admin/login"
-              className="block rounded-2xl bg-emerald-700 px-4 py-3 text-center text-sm font-semibold text-white"
+              className="block rounded-2xl bg-emerald-700 px-4 py-2.5 text-center text-[13px] font-semibold text-white"
               onClick={() => setMobileOpen(false)}
             >
               Buka CMS

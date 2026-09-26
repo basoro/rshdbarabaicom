@@ -43,10 +43,10 @@ export default function PageContentPage() {
   return (
     <div className="container py-16">
       <section className="rounded-[2.5rem] bg-white p-8 shadow-xl shadow-slate-200/50 md:p-12">
-        <p className="text-sm uppercase tracking-[0.35em] text-emerald-700">Halaman</p>
-        <h1 className="mt-4 font-display text-5xl text-slate-900">{page.title}</h1>
-        {page.desc ? <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">{page.desc}</p> : null}
-        <RichHtml html={page.content} className="mt-10" />
+        <p className="text-[12px] uppercase tracking-[0.35em] text-emerald-700">Halaman</p>
+        <h1 className="mt-4 font-display text-4xl text-slate-900">{page.title}</h1>
+        {page.desc ? <p className="mt-4 max-w-3xl text-[16px] leading-8 text-slate-600">{page.desc}</p> : null}
+        <RichHtml html={page.content} className="mt-10 text-[15px]" />
       </section>
     </div>
   );

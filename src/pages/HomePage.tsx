@@ -89,13 +89,13 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,0.62),rgba(15,23,42,0.26)_48%,rgba(255,255,255,0.06)),linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))]" />
         <div className="container relative grid gap-8 py-16 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:py-20">
           <div>
-            <p className="inline-flex rounded-full border border-white/20 bg-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-100">
+            <p className="inline-flex rounded-full border border-white/20 bg-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white">
               {currentSlide.eyebrow}
             </p>
-            <h1 className="mt-5 max-w-3xl font-display text-[3.35rem] font-semibold leading-[1.02] md:text-[4rem]">
+            <h1 className="mt-5 max-w-3xl font-display text-[3.35rem] font-semibold leading-[1.02] text-white md:text-[3.3rem]">
               {currentSlide.title}
             </h1>
-            <p className="mt-4 max-w-2xl text-[15px] leading-8 text-slate-100 md:text-base">
+            <p className="mt-4 max-w-2xl text-[15px] leading-8 text-white/90 md:text-base">
               {currentSlide.description}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -134,7 +134,7 @@ export default function HomePage() {
           <div className="lg:pl-6">
             <div className="rounded-[1.75rem] border border-white/20 bg-white/14 p-6 backdrop-blur">
               <p className="text-xs font-bold uppercase tracking-[0.35em] text-amber-200">Pelayanan Terintegrasi</p>
-              <h2 className="mt-3 font-display text-[2.15rem] font-semibold leading-tight">Pelayanan cepat, ramah, dan profesional</h2>
+              <h2 className="mt-3 font-display text-[24px] font-semibold leading-tight text-white">Pelayanan cepat, ramah, dan profesional</h2>
               <p className="mt-3 text-sm leading-7 text-slate-100/85">
                 Rumah sakit rujukan dengan layanan unggulan, fasilitas lengkap, dan tenaga medis berpengalaman.
               </p>
@@ -166,7 +166,7 @@ export default function HomePage() {
                 href={item.url}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-[1.2rem] border border-slate-100 bg-slate-50 px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:border-[#d84f86]/20 hover:bg-[#fff3f8] hover:text-[#b73567]"
+                className="rounded-[1.2rem] border border-slate-100 bg-slate-50 px-4 py-3 text-center text-[13px] font-semibold text-slate-700 transition hover:border-[#d84f86]/20 hover:bg-[#fff3f8] hover:text-[#b73567]"
               >
                 {item.label}
               </a>
@@ -174,7 +174,7 @@ export default function HomePage() {
               <Link
                 key={item.label}
                 to={`/${item.slug}`}
-                className="rounded-[1.2rem] border border-slate-100 bg-slate-50 px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:border-[#d84f86]/20 hover:bg-[#fff3f8] hover:text-[#b73567]"
+                className="rounded-[1.2rem] border border-slate-100 bg-slate-50 px-4 py-3 text-center text-[13px] font-semibold text-slate-700 transition hover:border-[#d84f86]/20 hover:bg-[#fff3f8] hover:text-[#b73567]"
               >
                 {item.label}
               </Link>
@@ -207,11 +207,11 @@ export default function HomePage() {
             <p className="text-xs font-bold uppercase tracking-[0.38em] text-emerald-700">
               Kenapa harus RSHD Barabai?
             </p>
-            <h2 className="mt-3 font-display text-[2.5rem] font-semibold leading-tight text-slate-900 md:text-[3rem]">
+            <h2 className="mt-3 font-display text-[2.5rem] font-semibold leading-tight text-slate-900 md:text-[2.5rem]">
               Pelayanan kami <span className="text-[#d84f86]">PARIPURNA</span> dengan TIM
               terbaik di bidangnya.
             </h2>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600">
+            <p className="mt-5 max-w-2xl text-[14.5px] leading-7 text-slate-600">
               Setiap pasien mendapatkan perawatan terbaik dari kami. Setiap pasien adalah
               istimewa. Bukan hanya membantu kesembuhan, kami juga memberi pengalaman
               berkesan buat anda.
@@ -235,14 +235,14 @@ export default function HomePage() {
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link
                 to="/hubungi"
-                className="inline-flex items-center gap-2 rounded-full bg-[#d84f86] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#c43d72]"
+                className="inline-flex items-center gap-2 rounded-full bg-[#d84f86] px-6 py-3 text-[12px] font-semibold text-white transition hover:bg-[#c43d72]"
               >
                 Hubungi
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 to="/profil"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 transition hover:text-[#b73567]"
+                className="inline-flex items-center gap-2 text-[12px] font-semibold text-slate-700 transition hover:text-[#b73567]"
               >
                 Tentang Kami
               </Link>
@@ -271,11 +271,11 @@ export default function HomePage() {
                   {featuredServiceIcons[service.slug]}
                 </div>
               ) : null}
-              <p className="mt-12 text-xs font-bold uppercase tracking-[0.35em] text-emerald-700">Layanan</p>
-              <h3 className="relative font-display text-[1.85rem] font-semibold text-slate-900">{service.title}</h3>
-              <p className="mt-2 text-sm leading-7 text-slate-600">{service.description}</p>
+              <p className="mt-12 text-[12px] font-bold uppercase tracking-[0.35em] text-emerald-700">Layanan</p>
+              <h3 className="mt-2  relative font-display text-[1.6rem] font-semibold text-slate-900">{service.title}</h3>
+              <p className="mt-2 text-[13px] leading-5 text-slate-600">{service.description}</p>
               <div className="mt-auto pt-6">
-                <span className="inline-flex items-center gap-2 rounded-full bg-[#fff3f8] px-4 py-2 text-sm font-semibold text-[#b73567]">
+                <span className="inline-flex items-center gap-2 rounded-full bg-[#fff3f8] px-4 py-2 text-[13px] font-semibold text-[#b73567]">
                   Selengkapnya
                   <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
                 </span>
@@ -403,7 +403,7 @@ export default function HomePage() {
         <div className="grid gap-6 rounded-[2rem] bg-[#0f5f4f] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_28%)] px-8 py-10 text-white shadow-lg shadow-emerald-900/20 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.35em] text-emerald-200">Download & Pengaduan</p>
-            <h2 className="mt-3 font-display text-[2.35rem] font-semibold">APAM Barabai dan kanal layanan digital RSHD</h2>
+            <h2 className="mt-3 font-display text-[2.35rem] font-semibold text-white">APAM Barabai dan kanal layanan digital RSHD</h2>
             <p className="mt-4 max-w-2xl text-sm leading-8 text-emerald-50/85">
               Unduh aplikasi APAM Barabai, akses informasi penting, dan gunakan kanal pengaduan resmi untuk komunikasi cepat dengan rumah sakit.
             </p>

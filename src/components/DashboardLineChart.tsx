@@ -21,45 +21,40 @@ const variantStyles: Record<
     eyebrow: string;
     accent: string;
     accentDark: string;
-    accentSoft: string;
-    accentText: string;
+    valueFill: string;
     gradientFrom: string;
     gradientTo: string;
   }
 > = {
   emerald: {
-    eyebrow: 'text-emerald-300',
+    eyebrow: 'text-emerald-700 dark:text-emerald-300',
     accent: '#34d399',
     accentDark: '#059669',
-    accentSoft: '#a7f3d0',
-    accentText: '#064e3b',
+    valueFill: 'fill-emerald-700 dark:fill-emerald-200',
     gradientFrom: 'rgba(16, 185, 129, 0.35)',
     gradientTo: 'rgba(16, 185, 129, 0)',
   },
   cyan: {
-    eyebrow: 'text-cyan-300',
+    eyebrow: 'text-cyan-700 dark:text-cyan-300',
     accent: '#22d3ee',
     accentDark: '#0891b2',
-    accentSoft: '#a5f3fc',
-    accentText: '#083344',
+    valueFill: 'fill-cyan-700 dark:fill-cyan-200',
     gradientFrom: 'rgba(6, 182, 212, 0.35)',
     gradientTo: 'rgba(6, 182, 212, 0)',
   },
   rose: {
-    eyebrow: 'text-rose-300',
+    eyebrow: 'text-rose-700 dark:text-rose-300',
     accent: '#fb7185',
     accentDark: '#e11d48',
-    accentSoft: '#fecdd3',
-    accentText: '#4c0519',
+    valueFill: 'fill-rose-700 dark:fill-rose-200',
     gradientFrom: 'rgba(244, 63, 94, 0.32)',
     gradientTo: 'rgba(244, 63, 94, 0)',
   },
   amber: {
-    eyebrow: 'text-amber-300',
+    eyebrow: 'text-amber-700 dark:text-amber-300',
     accent: '#fbbf24',
     accentDark: '#d97706',
-    accentSoft: '#fde68a',
-    accentText: '#451a03',
+    valueFill: 'fill-amber-700 dark:fill-amber-200',
     gradientFrom: 'rgba(245, 158, 11, 0.32)',
     gradientTo: 'rgba(245, 158, 11, 0)',
   },
@@ -107,21 +102,24 @@ export default function DashboardLineChart({
   const gradientId = `line-area-${variant}`;
 
   return (
-    <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+    <div className="rounded-[2rem] border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className={`text-xs uppercase tracking-[0.35em] ${style.eyebrow}`}>{eyebrow}</p>
-          <h2 className="mt-2 font-display text-3xl text-white">{title}</h2>
-          {subtitle ? <p className="mt-2 text-sm text-slate-400">{subtitle}</p> : null}
+          <p className={`text-[11px] uppercase tracking-[0.32em] ${style.eyebrow}`}>{eyebrow}</p>
+          <h2 className="mt-2 font-display text-[26px] leading-tight text-slate-900 dark:text-white">{title}</h2>
+          {subtitle ? (
+            <p className="mt-2 text-[13px] text-slate-600 dark:text-slate-400">{subtitle}</p>
+          ) : null}
         </div>
-        <p className="text-sm text-slate-400">
-          Total: <span className="font-semibold text-white">{total}</span>
+        <p className="text-[13px] text-slate-600 dark:text-slate-400">
+          Total:{' '}
+          <span className="font-semibold text-slate-900 dark:text-white tabular-nums">{total}</span>
           {valueSuffix}
         </p>
       </div>
 
       {!points.length ? (
-        <div className="mt-10 rounded-2xl border border-dashed border-white/10 py-16 text-center text-sm text-slate-400">
+        <div className="mt-10 rounded-2xl border border-dashed border-slate-300 py-16 text-center text-[13px] text-slate-500 dark:border-white/10 dark:text-slate-400">
           {emptyText}
         </div>
       ) : (
@@ -149,15 +147,16 @@ export default function DashboardLineChart({
                     x2={chartWidth - paddingX}
                     y1={y}
                     y2={y}
-                    stroke="rgba(255,255,255,0.08)"
+                    className="stroke-slate-200 dark:stroke-white/10"
                     strokeDasharray="4 6"
                   />
                   <text
                     x={paddingX - 8}
                     y={y + 4}
                     textAnchor="end"
-                    fontSize="11"
+                    fontSize="10.5"
                     fill="#64748b"
+                    className="tabular-nums"
                   >
                     {value}
                   </text>
@@ -170,14 +169,14 @@ export default function DashboardLineChart({
               x2={paddingX}
               y1={paddingY}
               y2={paddingY + innerHeight}
-              stroke="rgba(255,255,255,0.1)"
+              className="stroke-slate-300 dark:stroke-white/10"
             />
             <line
               x1={paddingX}
               x2={chartWidth - paddingX}
               y1={paddingY + innerHeight}
               y2={paddingY + innerHeight}
-              stroke="rgba(255,255,255,0.1)"
+              className="stroke-slate-300 dark:stroke-white/10"
             />
 
             {areaPath ? (
@@ -196,7 +195,14 @@ export default function DashboardLineChart({
 
             {coords.map((coord, index) => (
               <g key={`point-${variant}-${index}-${coord.label}`}>
-                <circle cx={coord.x} cy={coord.y} r="6" fill="#020617" stroke={style.accent} strokeWidth="2" />
+                <circle
+                  cx={coord.x}
+                  cy={coord.y}
+                  r="6"
+                  className="fill-white dark:fill-slate-950"
+                  stroke={style.accent}
+                  strokeWidth="2"
+                />
                 <circle cx={coord.x} cy={coord.y} r="2.5" fill={style.accent} />
                 <title>{`${coord.label}: ${coord.value}`}</title>
               </g>
@@ -208,8 +214,8 @@ export default function DashboardLineChart({
                   x={coord.x}
                   y={chartHeight + 22}
                   textAnchor="middle"
-                  fontSize="11"
-                  fill="#94a3b8"
+                  fontSize="10.5"
+                  className="fill-slate-500 dark:fill-slate-400"
                 >
                   {coord.label}
                 </text>
@@ -217,8 +223,8 @@ export default function DashboardLineChart({
                   x={coord.x}
                   y={coord.y - 12}
                   textAnchor="middle"
-                  fontSize="11"
-                  fill={style.accentSoft}
+                  fontSize="10.5"
+                  className={`${style.valueFill} tabular-nums`}
                   fontWeight="600"
                 >
                   {coord.value}

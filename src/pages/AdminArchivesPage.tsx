@@ -100,11 +100,13 @@ export default function AdminArchivesPage() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5">
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-emerald-300">Arsip</p>
-            <h1 className="mt-2 font-display text-4xl text-white">Dokumen</h1>
+            <p className="text-[12px] uppercase tracking-[0.35em] text-emerald-700 dark:text-emerald-300">
+              Arsip
+            </p>
+            <h1 className="mt-2 font-display text-3xl text-slate-900 dark:text-white">Dokumen</h1>
           </div>
           <button
             type="button"
@@ -118,13 +120,13 @@ export default function AdminArchivesPage() {
           </button>
         </div>
 
-        <label className="mt-6 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-          <Search className="h-4 w-4 text-slate-400" />
+        <label className="mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-white/5">
+          <Search className="h-4 w-4text-slate-500 dark:text-slate-400" />
           <input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Cari nama, kategori, atau tahun arsip"
-            className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+            className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500"
           />
         </label>
 
@@ -137,15 +139,15 @@ export default function AdminArchivesPage() {
               className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
                 selectedId === item.id
                   ? 'border-emerald-400 bg-emerald-500/15'
-                  : 'border-white/10 bg-white/5 hover:bg-white/10'
+                  : 'border-slate-200 bg-white hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10'
               }`}
             >
-              <p className="font-semibold text-white">{item.nama_dokumen}</p>
-              <p className="mt-1 text-sm text-slate-400">{item.kategori} • {item.tahun}</p>
+              <p className="font-semibold text-[14px] text-slate-900 dark:text-white">{item.nama_dokumen}</p>
+              <p className="mt-1 text-[12px] text-slate-500 dark:text-slate-400">{item.kategori} • {item.tahun}</p>
             </button>
           ))}
           {!paginatedItems.length ? (
-            <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-slate-400">
+            <div className="rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500 dark:border-white/10 dark:text-slate-400">
               {searchQuery ? 'Tidak ada arsip yang cocok dengan pencarian.' : 'Belum ada arsip.'}
             </div>
           ) : null}
@@ -160,24 +162,24 @@ export default function AdminArchivesPage() {
         />
       </section>
 
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+      <section className="rounded-[2rem] border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
         <div className="grid gap-4 md:grid-cols-2">
           <input
             value={form.nama_dokumen}
             onChange={(event) => setForm((current) => ({ ...current, nama_dokumen: event.target.value }))}
             placeholder="Nama dokumen"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring md:col-span-2"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring md:col-span-2"
           />
           <input
             value={form.kategori}
             onChange={(event) => setForm((current) => ({ ...current, kategori: event.target.value }))}
             placeholder="Kategori"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
           />
           <select
             value={form.jenis}
             onChange={(event) => setForm((current) => ({ ...current, jenis: event.target.value }))}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
           >
             <option value="Publik">Publik</option>
             <option value="Private">Private</option>
@@ -187,19 +189,19 @@ export default function AdminArchivesPage() {
             value={form.tahun}
             onChange={(event) => setForm((current) => ({ ...current, tahun: Number(event.target.value) }))}
             placeholder="Tahun"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
           />
           <input
             value={form.ekstensi}
             onChange={(event) => setForm((current) => ({ ...current, ekstensi: event.target.value }))}
             placeholder="Ekstensi"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
           />
           <input
             value={form.file_path}
             onChange={(event) => setForm((current) => ({ ...current, file_path: event.target.value }))}
             placeholder="Path file atau URL"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring md:col-span-2"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring md:col-span-2"
           />
         </div>
 
@@ -231,7 +233,7 @@ export default function AdminArchivesPage() {
             <button
               type="button"
               onClick={handleDelete}
-              className="inline-flex items-center gap-2 rounded-2xl border border-rose-400/30 px-5 py-3 text-sm font-semibold text-rose-200"
+              className="inline-flex items-center gap-2 rounded-2xl border border-rose-300 px-5 py-3 text-sm font-semibold text-rose-600 dark:border-rose-400/30 dark:text-rose-200"
             >
               <Trash2 className="h-4 w-4" />
               Hapus

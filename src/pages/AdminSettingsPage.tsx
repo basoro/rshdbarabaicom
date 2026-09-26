@@ -95,9 +95,13 @@ export default function AdminSettingsPage() {
   const entries = useMemo(() => Object.entries(settings), [settings]);
 
   return (
-    <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-      <p className="text-sm uppercase tracking-[0.35em] text-emerald-300">Pengaturan Situs</p>
-      <h1 className="mt-2 font-display text-5xl text-white">Identitas website</h1>
+    <div className="rounded-[2rem] border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
+      <p className="text-[12px] uppercase tracking-[0.35em] text-emerald-700 dark:text-emerald-300">
+        Pengaturan Situs
+      </p>
+      <h1 className="mt-2 font-display text-4xl text-slate-900 dark:text-white">
+        Identitas website
+      </h1>
       <div className="mt-8 grid gap-4 md:grid-cols-2">
         {entries.map(([field, value]) => {
           const meta = FIELD_META[field];
@@ -116,7 +120,9 @@ export default function AdminSettingsPage() {
                   minHeightClassName="min-h-40"
                 />
                 {meta?.description ? (
-                  <p className="mt-3 text-sm leading-6 text-slate-400">{meta.description}</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                    {meta.description}
+                  </p>
                 ) : null}
               </div>
             );
@@ -125,17 +131,17 @@ export default function AdminSettingsPage() {
           if (LONG_TEXT_FIELDS.has(field)) {
             return (
               <label key={field} className="block md:col-span-2">
-                <span className="mb-2 block text-sm font-medium text-slate-300">{label}</span>
+                <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">{label}</span>
                 <textarea
                   value={value}
                   onChange={(event) =>
                     setSettings((current) => ({ ...current, [field]: event.target.value }))
                   }
                   rows={4}
-                  className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm leading-7 text-white outline-none ring-emerald-500 focus:ring"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm leading-7 text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
                 />
                 {meta?.description ? (
-                  <span className="mt-2 block text-xs leading-6 text-slate-400">
+                  <span className="mt-2 block text-xs leading-6 text-slate-600 dark:text-slate-400">
                     {meta.description}
                   </span>
                 ) : null}
@@ -145,16 +151,16 @@ export default function AdminSettingsPage() {
 
           return (
             <label key={field} className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-300">{label}</span>
+              <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">{label}</span>
               <input
                 value={value}
                 onChange={(event) =>
                   setSettings((current) => ({ ...current, [field]: event.target.value }))
                 }
-                className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none ring-emerald-500 focus:ring"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm text-slate-900 outline-none dark:border-white/10 dark:bg-white/5 dark:text-white ring-emerald-500 focus:ring"
               />
               {meta?.description ? (
-                <span className="mt-2 block text-xs leading-6 text-slate-400">
+                <span className="mt-2 block text-xs leading-6 text-slate-600 dark:text-slate-400">
                   {meta.description}
                 </span>
               ) : null}

@@ -42,18 +42,21 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-sm uppercase tracking-[0.35em] text-emerald-300">Ringkasan</p>
-        <h1 className="mt-3 font-display text-5xl text-white">Dashboard CMS</h1>
-        <p className="mt-3 max-w-2xl text-slate-400">
-          Panel administrasi ini langsung terhubung ke `database.sdb` yang sama dengan frontend publik.
+        <p className="text-[12px] uppercase tracking-[0.35em] text-emerald-700 dark:text-emerald-300">
+          Ringkasan
         </p>
+        <h1 className="mt-3 font-display text-4xl text-slate-900 dark:text-white">
+          Dashboard CMS
+        </h1>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
         {cards.map((card) => (
-          <div key={card.label} className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-            <p className="text-sm uppercase tracking-[0.35em] text-emerald-300">{card.label}</p>
-            <p className="mt-4 font-display text-5xl text-white">{card.value}</p>
+          <div key={card.label} className="rounded-[2rem] border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[11px] uppercase tracking-[0.32em] text-emerald-700 dark:text-emerald-300">
+              {card.label}
+            </p>
+            <p className="mt-4 font-display text-4xl text-slate-900 dark:text-white tabular-nums">{card.value}</p>
           </div>
         ))}
       </div>
@@ -85,42 +88,42 @@ export default function AdminDashboardPage() {
           valueSuffix=" kunjungan"
           variant="cyan"
         />
-        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-cyan-300">Ringkasan</p>
-            <h2 className="mt-2 font-display text-3xl text-white">Kinerja Website</h2>
+            <p className="text-xs uppercase tracking-[0.35em] text-cyan-700 dark:text-cyan-300">Ringkasan</p>
+            <h2 className="mt-2 font-display text-3xl text-slate-900 dark:text-white">Kinerja Website</h2>
           </div>
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-cyan-500/10 bg-cyan-500/5 p-5">
-              <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Total Kunjungan</p>
-              <p className="mt-3 font-display text-4xl text-white">
+            <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5 dark:border-cyan-500/10 dark:bg-cyan-500/5">
+              <p className="text-xs uppercase tracking-[0.2em] text-cyan-700 dark:text-cyan-300">Total Kunjungan</p>
+              <p className="mt-3 font-display text-4xl text-slate-900 dark:text-white">
                 {visitsByMonth.reduce((acc, row) => acc + row.total, 0)}
               </p>
             </div>
-            <div className="rounded-2xl border border-emerald-500/10 bg-emerald-500/5 p-5">
-              <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">Bulan Terbaik</p>
-              <p className="mt-3 font-display text-4xl text-white">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-500/10 dark:bg-emerald-500/5">
+              <p className="text-xs uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">Bulan Terbaik</p>
+              <p className="mt-3 font-display text-4xl text-slate-900 dark:text-white">
                 {visitsByMonth
                   .slice()
                   .sort((a, b) => b.total - a.total)[0]?.label || '-'}
               </p>
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                 {visitsByMonth.slice().sort((a, b) => b.total - a.total)[0]?.total ?? 0} kunjungan
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Rata-rata / Bulan</p>
-              <p className="mt-3 font-display text-4xl text-white">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-700 dark:text-slate-300">Rata-rata / Bulan</p>
+              <p className="mt-3 font-display text-4xl text-slate-900 dark:text-white">
                 {Math.round(
                   visitsByMonth.reduce((acc, row) => acc + row.total, 0) /
                     Math.max(visitsByMonth.filter((row) => row.total > 0).length, 1) || 0,
                 )}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Aktif Tracker</p>
-              <p className="mt-3 font-display text-4xl text-white">Aktif</p>
-              <p className="mt-1 text-sm text-slate-400">Auto-record di semua halaman publik</p>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-700 dark:text-slate-300">Aktif Tracker</p>
+              <p className="mt-3 font-display text-4xl text-slate-900 dark:text-white">Aktif</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Auto-record di semua halaman publik</p>
             </div>
           </div>
         </div>

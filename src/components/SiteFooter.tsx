@@ -33,7 +33,7 @@ export default function SiteFooter({ bootstrap }: SiteFooterProps) {
       </div>
       <div className="container grid gap-10 py-14 md:grid-cols-2 xl:grid-cols-4">
         <div>
-          <h3 className="font-display text-[1.85rem] font-semibold">{bootstrap.settings.nama_instansi || 'RSUD H. Damanhuri'}</h3>
+          <h4 className="font-display text-[1.4rem] font-semibold text-white">{bootstrap.settings.nama_instansi || 'RSUD H. Damanhuri'}</h4>
           <div className="mt-6 space-y-3 text-sm text-emerald-100/80">
             <p className="flex items-start gap-3">
               <MapPin className="mt-1 h-4 w-4" />
@@ -51,7 +51,7 @@ export default function SiteFooter({ bootstrap }: SiteFooterProps) {
         </div>
 
         <div>
-          <h4 className="font-display text-[1.85rem] font-semibold">Layanan Utama</h4>
+          <h4 className="font-display text-[1.4rem] font-semibold text-white">Layanan Utama</h4>
           <div className="mt-5 grid gap-3 text-sm text-emerald-100/80">
             {bootstrap.featuredServices.map((service) => (
               <Link key={service.slug} to={`/${service.slug}`} className="transition hover:text-white">
@@ -62,7 +62,7 @@ export default function SiteFooter({ bootstrap }: SiteFooterProps) {
         </div>
 
         <div>
-          <h4 className="font-display text-[1.85rem] font-semibold">Tautan Penting</h4>
+          <h4 className="font-display text-[1.4rem] font-semibold text-white">Tautan Penting</h4>
           <div className="mt-5 grid gap-3 text-sm text-emerald-100/80">
             {quickLinks.map((item) =>
               item.url ? (
@@ -79,7 +79,7 @@ export default function SiteFooter({ bootstrap }: SiteFooterProps) {
         </div>
 
         <div>
-          <h4 className="font-display text-[1.85rem] font-semibold">Media Sosial & Aplikasi</h4>
+          <h4 className="font-display text-[1.4rem] font-semibold text-white">Media Sosial & Aplikasi</h4>
           <p className="mt-5 text-sm leading-7 text-emerald-100/80">
             Ikuti informasi rumah sakit, berita layanan, dan publikasi terkini melalui kanal resmi.
           </p>
@@ -105,10 +105,10 @@ export default function SiteFooter({ bootstrap }: SiteFooterProps) {
         </div>
       </div>
       <div className="border-t border-emerald-900">
-        <div className="container flex flex-col gap-3 py-5 text-sm text-emerald-200/70 md:flex-row md:items-center md:justify-between">
+        <div className="container flex flex-col gap-3 py-5 text-[14px] text-emerald-200/70 md:flex-row md:items-center md:justify-between">
           <RichHtml
             html={footerHtml}
-            className="prose prose-sm text-emerald-200/70 prose-p:my-0 prose-a:text-white prose-a:no-underline hover:prose-a:text-emerald-100"
+            className="prose prose-sm text-emerald-200/70 text-[14px] prose-p:my-0 prose-a:text-white prose-a:no-underline hover:prose-a:text-emerald-100"
           />
           <p>Powered by mLITE.id</p>
         </div>

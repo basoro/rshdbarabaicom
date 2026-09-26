@@ -8,7 +8,8 @@ export const heroSlides = [
       'Pemanfaatan teknologi inovatif untuk meningkatkan kualitas perawatan dan pengalaman pasien.',
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/KTvrVGD0yeo',
-    image: '/api/public/media/local/hero/hero-01.jpg',
+    image:
+      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-01.jpg',
   },
   {
     eyebrow: 'RSUD H. Damanhuri',
@@ -17,7 +18,8 @@ export const heroSlides = [
       'Ruang bermain anak yang aman serta area menyusui yang nyaman untuk keluarga pasien.',
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/l-dLJOguwZI',
-    image: '/api/public/media/local/hero/hero-02.jpg',
+    image:
+      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-02.jpg',
   },
   {
     eyebrow: 'RSUD H. Damanhuri',
@@ -26,7 +28,8 @@ export const heroSlides = [
       'Layanan berkarakter, ikhlas, dan berakhlak dengan semangat 5S di seluruh area rumah sakit.',
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/YnE-tv47VU8',
-    image: '/api/public/media/local/hero/hero-03.jpg',
+    image:
+      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-03.jpg',
   },
 ];
 
@@ -239,16 +242,11 @@ export function resolveArchiveUrl(filePath: string): string {
     return filePath;
   }
 
-  const normalizedPath = filePath.replace(/^\/+/, '');
-
-  if (
-    normalizedPath.startsWith('uploads/') ||
-    normalizedPath.startsWith('api/public/media/local/')
-  ) {
-    return `/${normalizedPath}`;
+  if (filePath.startsWith('uploads/') || filePath.startsWith('/uploads/')) {
+    return `/${filePath.replace(/^\/+/, '')}`;
   }
 
-  return `${SITE_ORIGIN}/${normalizedPath}`;
+  return `${SITE_ORIGIN}/${filePath.replace(/^\/+/, '')}`;
 }
 
 export function resolveDoctorPhotoProxy(photoPath: string): string {

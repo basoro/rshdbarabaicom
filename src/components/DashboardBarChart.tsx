@@ -23,26 +23,31 @@ export default function DashboardBarChart({
   const barGap = 14;
 
   return (
-    <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+    <div className="rounded-[2rem] border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
       <div className="flex items-end justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300">Statistik</p>
-          <h2 className="mt-2 font-display text-3xl text-white">{title}</h2>
+          <p className="text-[11px] uppercase tracking-[0.32em] text-emerald-700 dark:text-emerald-300">
+            Statistik
+          </p>
+          <h2 className="mt-2 font-display text-[26px] leading-tight text-slate-900 dark:text-white">{title}</h2>
         </div>
-        <p className="text-sm text-slate-400">
-          Total: <span className="font-semibold text-white">{items.reduce((acc, item) => acc + item.value, 0)}</span>
+        <p className="text-[13px] text-slate-600 dark:text-slate-400">
+          Total:{' '}
+          <span className="font-semibold text-slate-900 dark:text-white tabular-nums">
+            {items.reduce((acc, item) => acc + item.value, 0)}
+          </span>
           {valueSuffix}
         </p>
       </div>
 
       {!items.length ? (
-        <div className="mt-10 rounded-2xl border border-dashed border-white/10 py-16 text-center text-sm text-slate-400">
+        <div className="mt-10 rounded-2xl border border-dashed border-slate-300 py-16 text-center text-[13px] text-slate-500 dark:border-white/10 dark:text-slate-400">
           {emptyText}
         </div>
       ) : (
         <div className="mt-8">
           <div
-            className="relative w-full border-b border-l border-white/10"
+            className="relative w-full border-b border-l border-slate-300 dark:border-white/10"
             style={{ height }}
           >
             {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
@@ -51,10 +56,10 @@ export default function DashboardBarChart({
               return (
                 <div
                   key={`grid-${ratio}`}
-                  className="absolute left-0 right-0 border-t border-dashed border-white/5"
+                  className="absolute left-0 right-0 border-t border-dashed border-slate-200 dark:border-white/5"
                   style={{ top: y }}
                 >
-                  <span className="absolute -left-1 -translate-x-full -translate-y-1/2 text-[11px] text-slate-500">
+                  <span className="absolute -left-1 -translate-x-full -translate-y-1/2 text-[10.5px] tabular-nums text-slate-500">
                     {value}
                   </span>
                 </div>
@@ -92,11 +97,11 @@ export default function DashboardBarChart({
                   className="flex flex-1 flex-col items-center justify-start gap-1"
                   style={{ maxWidth: barWidth, minWidth: 0 }}
                 >
-                  <span className="line-clamp-1 text-[11px] font-semibold text-emerald-200">
+                  <span className="line-clamp-1 text-[10.5px] font-semibold tabular-nums text-emerald-700 dark:text-emerald-200">
                     {item.value}
                   </span>
                   <span
-                    className="line-clamp-2 w-full break-words text-center text-[11px] leading-4 text-slate-400"
+                    className="line-clamp-2 w-full break-words text-center text-[10.5px] leading-4 text-slate-600 dark:text-slate-400"
                     title={item.label}
                   >
                     {item.label}
