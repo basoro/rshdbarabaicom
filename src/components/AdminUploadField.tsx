@@ -8,6 +8,7 @@ type AdminUploadFieldProps = {
   target: string;
   accept?: string;
   helpText?: string;
+  visibility?: 'public' | 'private';
   onUploaded: (result: { filePath: string; fileUrl: string; originalName: string }) => void;
 };
 
@@ -16,6 +17,7 @@ export default function AdminUploadField({
   target,
   accept,
   helpText,
+  visibility = 'public',
   onUploaded,
 }: AdminUploadFieldProps) {
   const token = useAdminStore((state) => state.token);
@@ -32,7 +34,7 @@ export default function AdminUploadField({
     setUploading(true);
     setError('');
     try {
-      const result = await adminUploadFile(token, file, target);
+      const result = await adminUploadFile(token, file, target, visibility);
       onUploaded(result);
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : 'Upload gagal.');

@@ -59,6 +59,11 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '../..');
 const uploadsRoot = path.resolve(__dirname, '../../uploads');
 const localMediaRoot = path.resolve(__dirname, '../public/media/local');
+const privateArsipRoot = path.resolve(__dirname, '../../private-arsip');
+const envLegacyArchiveRootRaw = (process.env.LIVE_LEGACY_ARCHIVE_ROOT || '').trim();
+const envLegacyArchiveRoot = envLegacyArchiveRootRaw
+  ? path.resolve(envLegacyArchiveRootRaw)
+  : null;
 
 const router = Router();
 const PUBLIC_NEWS_STATUS = 2;
@@ -715,16 +720,31 @@ async function serveArchiveFile(
   const isLocalUploadPath =
     !isExternalUrl &&
     (filePath.startsWith('uploads/') || filePath.startsWith('/uploads/'));
+  const isPrivateArsipPath =
+    !isExternalUrl &&
+    (normalizedPath.startsWith('private-arsip/') ||
+      normalizedPath.startsWith('arsipdokumen/pdfprivate/'));
   const pathHasSlashes = normalizedPath.includes('/') || normalizedPath.includes('\\');
+  if (isPrivateArsipPath) {
+    res.status(403).json({
+      success: false,
+      error: 'Dokumen bersifat internal. Silakan login sebagai admin melalui panel CMS untuk mengaksesnya.',
+    });
+    return;
+  }
 
   const localCandidates: string[] = [];
   if (!isExternalUrl) {
+    if (envLegacyArchiveRoot && normalizedPath.startsWith('arsipdokumen/')) {
+      localCandidates.push(path.join(envLegacyArchiveRoot, normalizedPath));
+    }
     if (isLocalUploadPath) {
       localCandidates.push(path.join(uploadsRoot, filePath.replace(/^\/?uploads\//, '')));
     } else {
       localCandidates.push(path.join(projectRoot, normalizedPath));
     }
     if (!pathHasSlashes) {
+      localCandidates.push(path.join(localMediaRoot, 'arsip', normalizedPath));
       localCandidates.push(path.join(uploadsRoot, 'arsip', normalizedPath));
       localCandidates.push(path.join(uploadsRoot, normalizedPath));
     }
@@ -849,18 +869,27 @@ router.get('/media/local/arsip/:filename', (req: Request, res: Response) => {
   const disposition = forceDownload ? 'attachment' : matchedExt === 'pdf' ? 'inline' : 'attachment';
   const dispositionHeader = `${disposition}; filename*=UTF-8''${encodeURIComponent(safeFilename)}; filename="${encodeURIComponent(safeFilename)}"`;
 
-  const directPath = path.join(uploadsRoot, 'arsip', safeFilename);
-  try {
-    if (fs.existsSync(directPath) && fs.statSync(directPath).isFile()) {
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', dispositionHeader);
-      res.setHeader('Cache-Control', 'private, max-age=3600');
-      console.log(`[media/local/arsip] Serve local: ${directPath}`);
-      res.sendFile(directPath);
-      return;
+  const directCandidates: string[] = [];
+  if (envLegacyArchiveRoot) {
+    directCandidates.push(path.join(envLegacyArchiveRoot, 'arsipdokumen', 'pdf', safeFilename));
+  }
+  directCandidates.push(
+    path.join(localMediaRoot, 'arsip', safeFilename),
+    path.join(uploadsRoot, 'arsip', safeFilename),
+  );
+  for (const directPath of directCandidates) {
+    try {
+      if (fs.existsSync(directPath) && fs.statSync(directPath).isFile()) {
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', dispositionHeader);
+        res.setHeader('Cache-Control', 'private, max-age=3600');
+        console.log(`[media/local/arsip] Serve local: ${directPath}`);
+        res.sendFile(directPath);
+        return;
+      }
+    } catch {
+      // skip
     }
-  } catch {
-    // skip
   }
 
   const row = get<ArchiveRow>(
@@ -879,6 +908,17 @@ router.get('/media/local/arsip/:filename', (req: Request, res: Response) => {
   );
 
   if (row) {
+    const rowPathClean = (row.file_path || '').replace(/^\/+/, '');
+    if (
+      rowPathClean.startsWith('private-arsip/') ||
+      rowPathClean.startsWith('arsipdokumen/pdfprivate/')
+    ) {
+      res.status(403).json({
+        success: false,
+        error: 'Dokumen bersifat internal. Silakan login panel CMS admin untuk melihat atau mengunduh dokumen ini.',
+      });
+      return;
+    }
     const redirectRoute = forceDownload ? 'download' : 'view';
     console.log(`[media/local/arsip] File not local. Redirect to arsip proxy #${row.id}/${redirectRoute}`);
     res.redirect(302, `/api/public/arsip/${row.id}/${redirectRoute}`);

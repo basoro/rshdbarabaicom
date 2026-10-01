@@ -15,9 +15,26 @@ type SessionRow = {
 
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
   const authorization = req.headers.authorization;
-  const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : '';
+  let token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : '';
 
   if (!token) {
+    const rawQuery = req.query.token;
+    let queryToken = '';
+    if (typeof rawQuery === 'string') {
+      queryToken = rawQuery;
+    } else if (Array.isArray(rawQuery) && rawQuery.length > 0 && typeof rawQuery[0] === 'string') {
+      queryToken = rawQuery[0];
+    }
+    queryToken = (queryToken || '').trim();
+    if (queryToken.length >= 32) {
+      token = queryToken;
+    }
+  }
+
+  if (!token) {
+    console.log(
+      `[requireAdmin:401] Token kosong. method=${req.method} path=${req.path} headerAuth=${Boolean(authorization)} queryToken=${typeof req.query.token}`,
+    );
     res.status(401).json({
       success: false,
       error: 'Akses admin memerlukan login.',
@@ -39,6 +56,9 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction): v
   );
 
   if (!session) {
+    console.log(
+      `[requireAdmin:401-invalid] Token ada TAPI session tidak ketemu / expired. token=${token.slice(0, 8)}... len=${token.length}`,
+    );
     res.status(401).json({
       success: false,
       error: 'Sesi admin tidak valid atau sudah berakhir.',

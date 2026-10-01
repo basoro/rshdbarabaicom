@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import multer from 'multer';
 import { Router, type Request, type Response } from 'express';
@@ -76,15 +77,23 @@ type ArchiveRow = {
   created_at: string;
 };
 
+type LegacyNamingRequest = Request & {
+  _useLegacyMliteNaming?: boolean;
+  _archiveVisibility?: 'public' | 'private';
+};
+
 const router = Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '../..');
 const uploadsRoot = path.join(projectRoot, 'uploads');
 const localMediaRoot = path.join(projectRoot, 'api', 'public', 'media', 'local');
+const privateArsipRoot = path.join(projectRoot, 'private-arsip');
+const envLegacyRoot = (process.env.LIVE_LEGACY_ARCHIVE_ROOT || '').trim();
 
 const uploadStorage = multer.diskStorage({
   destination: (_req, _file, callback) => {
+    const req = _req as LegacyNamingRequest;
     const requestTarget =
       typeof _req.query.target === 'string'
         ? _req.query.target
@@ -92,6 +101,53 @@ const uploadStorage = multer.diskStorage({
           ? _req.body.target
           : 'misc';
     const target = requestTarget.replace(/[^a-z0-9-_]+/gi, '').toLowerCase() || 'misc';
+    const rawVisibility =
+      (typeof _req.query.visibility === 'string'
+        ? _req.query.visibility
+        : typeof _req.body.visibility === 'string'
+          ? _req.body.visibility
+          : 'public') || 'public';
+    const visibility = rawVisibility.toLowerCase() === 'private' ? 'private' : 'public';
+
+    req._archiveVisibility = visibility;
+    req._useLegacyMliteNaming = false;
+
+    if (target === 'arsip' && envLegacyRoot) {
+      const resolvedLegacyRoot = path.resolve(envLegacyRoot);
+      if (visibility === 'private') {
+        const legacyPrivate = path.join(resolvedLegacyRoot, 'arsipdokumen', 'pdfprivate');
+        try {
+          if (!fs.existsSync(legacyPrivate)) {
+            fs.mkdirSync(legacyPrivate, { recursive: true });
+          }
+          fs.accessSync(legacyPrivate, fs.constants.W_OK);
+          req._useLegacyMliteNaming = true;
+          callback(null, legacyPrivate);
+          return;
+        } catch {
+          // fallback to privateArsipRoot (default project) below
+        }
+      } else {
+        const legacyPublic = path.join(resolvedLegacyRoot, 'arsipdokumen', 'pdf');
+        try {
+          if (!fs.existsSync(legacyPublic)) {
+            fs.mkdirSync(legacyPublic, { recursive: true });
+          }
+          fs.accessSync(legacyPublic, fs.constants.W_OK);
+          req._useLegacyMliteNaming = true;
+          callback(null, legacyPublic);
+          return;
+        } catch {
+          // fallback to localMediaRoot/arsip (default project) below
+        }
+      }
+    }
+
+    if (target === 'arsip' && visibility === 'private') {
+      fs.mkdirSync(privateArsipRoot, { recursive: true });
+      callback(null, privateArsipRoot);
+      return;
+    }
     const folder = ['news', 'pages', 'arsip'].includes(target)
       ? path.join(localMediaRoot, target)
       : path.join(uploadsRoot, target);
@@ -99,15 +155,22 @@ const uploadStorage = multer.diskStorage({
     callback(null, folder);
   },
   filename: (_req, file, callback) => {
-    const extension = path.extname(file.originalname) || '';
+    const req = _req as LegacyNamingRequest;
+    const extension = (path.extname(file.originalname) || '').toLowerCase() || '.pdf';
+    if (req._useLegacyMliteNaming === true) {
+      const hashPart1 = crypto.randomBytes(6).toString('hex');
+      const hashPart2 = crypto.randomBytes(4).toString('hex');
+      callback(null, `${hashPart1}_${hashPart2}${extension}`);
+      return;
+    }
     const baseName = path
-      .basename(file.originalname, extension)
+      .basename(file.originalname, path.extname(file.originalname))
       .toLowerCase()
       .replace(/[^a-z0-9-]+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '')
       .slice(0, 48);
-    callback(null, `${Date.now()}-${baseName || 'file'}${extension.toLowerCase()}`);
+    callback(null, `${Date.now()}-${baseName || 'file'}${extension}`);
   },
 });
 
@@ -298,10 +361,22 @@ router.post('/upload', upload.single('file'), (req: Request, res: Response) => {
     return;
   }
 
-  const relativePath = path
+  let relativePath = path
     .relative(projectRoot, uploadedFile.path)
     .split(path.sep)
     .join('/');
+
+  if (envLegacyRoot) {
+    const resolvedLegacyRoot = path.resolve(envLegacyRoot);
+    const absUploadedPath = path.resolve(uploadedFile.path);
+    const legacyPrefix = resolvedLegacyRoot + path.sep;
+    if (absUploadedPath.startsWith(legacyPrefix) || absUploadedPath === resolvedLegacyRoot) {
+      relativePath = path
+        .relative(resolvedLegacyRoot, absUploadedPath)
+        .split(path.sep)
+        .join('/');
+    }
+  }
 
   res.json({
     success: true,
@@ -859,6 +934,142 @@ router.put('/arsip/:id', requireAdminModule('arsip'), (req: Request, res: Respon
 router.delete('/arsip/:id', requireAdminModule('arsip'), (req: Request, res: Response) => {
   run(`DELETE FROM arsip_dokumen WHERE id = ?`, [Number(req.params.id)]);
   res.json({ success: true });
+});
+
+function buildArchiveContentDisposition(
+  row: ArchiveRow,
+  mode: 'view' | 'download',
+): { contentType: string; disposition: string } {
+  const fileName = `${row.nama_dokumen.replace(/[^a-z0-9-_ .]+/gi, '_').trim() || `arsip-${row.id}`}.${row.ekstensi || 'pdf'}`;
+  const contentTypeMap: Record<string, string> = {
+    pdf: 'application/pdf',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    xls: 'application/vnd.ms-excel',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ppt: 'application/vnd.ms-powerpoint',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    webp: 'image/webp',
+  };
+  const contentType = contentTypeMap[(row.ekstensi || 'pdf').toLowerCase()] || 'application/octet-stream';
+  const dispositionType = mode === 'view' ? 'inline' : 'attachment';
+  const disposition = `${dispositionType}; filename*=UTF-8''${encodeURIComponent(fileName)}; filename="${encodeURIComponent(fileName)}"`;
+  return { contentType, disposition };
+}
+
+async function serveAdminArchive(
+  req: Request,
+  res: Response,
+  mode: 'view' | 'download',
+) {
+  const archiveId = Number(req.params.id);
+  if (!archiveId || Number.isNaN(archiveId)) {
+    res.status(400).json({ success: false, error: 'ID arsip tidak valid.' });
+    return;
+  }
+  const row = get<ArchiveRow>(`SELECT * FROM arsip_dokumen WHERE id = ? LIMIT 1`, [archiveId]);
+  if (!row) {
+    res.status(404).json({ success: false, error: 'Arsip dokumen tidak ditemukan.' });
+    return;
+  }
+  const { contentType, disposition } = buildArchiveContentDisposition(row, mode);
+  const filePath = row.file_path || '';
+  const normalizedPath = filePath.replace(/^\/+/, '');
+  const isExternalUrl = /^https?:\/\//i.test(filePath);
+  const isLocalUploadPath =
+    !isExternalUrl && (filePath.startsWith('uploads/') || filePath.startsWith('/uploads/'));
+  const isPrivateArsip = !isExternalUrl && normalizedPath.startsWith('private-arsip/');
+  const LIVE_LEGACY_ARCHIVE_ROOT = (process.env.LIVE_LEGACY_ARCHIVE_ROOT || '').trim().replace(/\/+$/, '');
+  const localCandidates: string[] = [];
+  if (!isExternalUrl) {
+    if (isPrivateArsip) {
+      localCandidates.push(path.join(privateArsipRoot, normalizedPath.replace(/^private-arsip\//, '')));
+    } else if (isLocalUploadPath) {
+      localCandidates.push(path.join(uploadsRoot, filePath.replace(/^\/?uploads\//, '')));
+    } else {
+      localCandidates.push(path.join(projectRoot, normalizedPath));
+    }
+    if (!normalizedPath.includes('/') && !normalizedPath.includes('\\')) {
+      localCandidates.push(path.join(localMediaRoot, 'arsip', normalizedPath));
+      localCandidates.push(path.join(uploadsRoot, 'arsip', normalizedPath));
+      if (LIVE_LEGACY_ARCHIVE_ROOT) {
+        localCandidates.push(path.join(LIVE_LEGACY_ARCHIVE_ROOT, 'arsipdokumen', 'pdf', normalizedPath));
+      }
+    }
+    if (LIVE_LEGACY_ARCHIVE_ROOT && /^arsipdokumen\/(pdf|pdfprivate)/i.test(normalizedPath)) {
+      localCandidates.unshift(path.join(LIVE_LEGACY_ARCHIVE_ROOT, normalizedPath));
+    }
+    const baseName = path.basename(normalizedPath, path.extname(normalizedPath));
+    const ext = path.extname(normalizedPath).replace(/^\./, '').toLowerCase() || row.ekstensi?.toLowerCase() || 'pdf';
+    const fallbackExts = new Set<string>([ext, 'pdf', 'docx', 'xlsx', 'jpg', 'jpeg', 'png', 'gif']);
+    for (const candidate of [...localCandidates]) {
+      const dir = path.dirname(candidate);
+      fallbackExts.forEach((e) => {
+        if (!candidate.toLowerCase().endsWith(`.${e}`)) {
+          localCandidates.push(path.join(dir, `${baseName}.${e}`));
+        }
+      });
+    }
+  }
+
+  let matched: string | null = null;
+  for (const candidate of localCandidates) {
+    try {
+      if (candidate && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+        matched = candidate;
+        break;
+      }
+    } catch {
+      // skip
+    }
+  }
+  if (matched) {
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', disposition);
+    res.setHeader('Cache-Control', 'private, max-age=300');
+    res.sendFile(matched);
+    return;
+  }
+  if (isExternalUrl) {
+    try {
+      const remote = await fetch(filePath, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (RSHD Admin Archive Proxy)',
+          'Accept': '*/*',
+        },
+      });
+      if (remote.ok) {
+        const finalContentType = remote.headers.get('content-type') || contentType;
+        const buffer = Buffer.from(await remote.arrayBuffer());
+        res.setHeader('Content-Type', finalContentType);
+        res.setHeader('Content-Disposition', disposition);
+        res.setHeader('Content-Length', String(buffer.length));
+        res.setHeader('Cache-Control', 'private, max-age=300');
+        res.send(buffer);
+        return;
+      }
+    } catch {
+      // skip
+    }
+    res.redirect(302, filePath);
+    return;
+  }
+  res.status(404).json({
+    success: false,
+    error: 'File arsip tidak ditemukan di lokasi manapun.',
+  });
+}
+
+router.get('/arsip/:id/view', requireAdminModule('arsip'), (req: Request, res: Response) => {
+  void serveAdminArchive(req, res, 'view');
+});
+
+router.get('/arsip/:id/download', requireAdminModule('arsip'), (req: Request, res: Response) => {
+  void serveAdminArchive(req, res, 'download');
 });
 
 router.get('/settings', requireAdminModule('settings'), (_req: Request, res: Response) => {

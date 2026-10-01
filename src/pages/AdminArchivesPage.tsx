@@ -98,6 +98,11 @@ export default function AdminArchivesPage() {
     }
   }
 
+  const uploadVisibility: 'public' | 'private' = String(form.jenis || 'Publik').toLowerCase() === 'private' ? 'private' : 'public';
+  const helpTextStorage = uploadVisibility === 'private'
+    ? 'Dokumen disimpan ke folder private-arsip (LUAR direktori publik). Hanya admin login yang bisa mengakses via panel CMS ini.'
+    : 'Dokumen akan disimpan ke folder api/public/media/local/arsip. Dapat diakses publik oleh pengunjung website sesuai hak akses jenis arsip.';
+
   return (
     <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
       <section className="rounded-[2rem] border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
@@ -209,7 +214,8 @@ export default function AdminArchivesPage() {
           <AdminUploadField
             label="Upload file arsip"
             target="arsip"
-            helpText="Dokumen akan disimpan ke folder api/public/media/local/arsip. Path dan ekstensi akan terisi otomatis."
+            visibility={uploadVisibility}
+            helpText={helpTextStorage}
             onUploaded={(result) =>
               setForm((current) => ({
                 ...current,
@@ -220,7 +226,48 @@ export default function AdminArchivesPage() {
           />
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-3">
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          {form.id ? (
+            String(form.jenis || 'Publik').toLowerCase() === 'private' ? (
+              <>
+                <a
+                  href={`/api/admin/arsip/${form.id}/view?token=${encodeURIComponent(token || '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
+                >
+                  Lihat Dokumen
+                </a>
+                <a
+                  href={`/api/admin/arsip/${form.id}/download?token=${encodeURIComponent(token || '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
+                >
+                  Unduh
+                </a>
+              </>
+            ) : (
+              <>
+                <a
+                  href={`/api/public/arsip/${form.id}/view`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
+                >
+                  Lihat Dokumen
+                </a>
+                <a
+                  href={`/api/public/arsip/${form.id}/download`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
+                >
+                  Unduh
+                </a>
+              </>
+            )
+          ) : null}
           <button
             type="button"
             onClick={handleSave}

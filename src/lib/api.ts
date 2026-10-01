@@ -309,9 +309,10 @@ export function apamLogout(token: string) {
   });
 }
 
-export function adminUploadFile(token: string, file: File, target: string) {
+export function adminUploadFile(token: string, file: File, target: string, visibility: 'public' | 'private' = 'public') {
   const formData = new FormData();
   formData.append('target', target);
+  formData.append('visibility', visibility);
   formData.append('file', file);
 
   return request<{
@@ -321,7 +322,7 @@ export function adminUploadFile(token: string, file: File, target: string) {
     size: number;
     filePath: string;
     fileUrl: string;
-  }>(`/api/admin/upload?target=${encodeURIComponent(target)}`, {
+  }>(`/api/admin/upload?target=${encodeURIComponent(target)}&visibility=${encodeURIComponent(visibility)}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
