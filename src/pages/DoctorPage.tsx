@@ -34,12 +34,9 @@ export default function DoctorPage() {
               <Stethoscope className="h-4 w-4" />
               Tim Medis RSHD
             </p>
-            <h1 className="mt-5 font-display text-5xl font-semibold leading-tight md:text-7xl">
+            <h1 className="mt-5 font-display text-5xl font-semibold leading-tight md:text-5xl">
               Temukan dokter yang tepat untuk kebutuhan kesehatan Anda.
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-emerald-50/85 md:text-lg">
-              Data dokter aktif diambil langsung dari sistem rumah sakit melalui koneksi MySQL.
-            </p>
           </div>
         </div>
       </section>

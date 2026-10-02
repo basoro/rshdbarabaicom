@@ -194,7 +194,7 @@ export default function HomePage() {
               />
             </div>
             <a
-              href="https://youtu.be/8rPB4A3zDnQ"
+              href="https://youtu.be/Gmbh_gWGl_Y?si=5BJtntOAII1y8vTw"
               target="_blank"
               rel="noreferrer"
               className="absolute bottom-6 right-6 inline-flex h-20 w-20 items-center justify-center rounded-full border-4 border-white bg-white shadow-xl shadow-slate-900/10 transition hover:scale-105"

@@ -3,11 +3,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 const SURVEY_URL =
   'https://skm.go.id/share/instansi/912a8be1-ac1b-4092-92a2-6505c56c2bf9/2';
 const POSTER_SRC = '/poster-skm.png';
-const SESSION_FLAG = 'rshd_skm_popup_shown';
+const LAST_SHOWN_FLAG = 'rshd_skm_popup_last_shown_at';
 const FORCE_DEV_FLAG = 'DEV_FORCE_SKM';
 const AUTO_CLOSE_SECONDS = 20;
 const SHOW_DELAY_MS = 500;
 const CLOSE_ANIM_MS = 280;
+const COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 export default function SurveyPopup() {
   const [mounted, setMounted] = useState(false);
@@ -36,8 +37,8 @@ export default function SurveyPopup() {
 
   const markSeen = useCallback(() => {
     try {
-      if (typeof window !== 'undefined' && window.sessionStorage) {
-        window.sessionStorage.setItem(SESSION_FLAG, '1');
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem(LAST_SHOWN_FLAG, Date.now().toString());
       }
     } catch {
       // ignore storage errors
@@ -121,10 +122,15 @@ export default function SurveyPopup() {
 
     if (!forceShow) {
       try {
-        const alreadyShown =
-          window.sessionStorage &&
-          window.sessionStorage.getItem(SESSION_FLAG) === '1';
-        if (alreadyShown) return;
+        const raw =
+          window.localStorage && window.localStorage.getItem(LAST_SHOWN_FLAG);
+        if (raw) {
+          const lastShownAt = parseInt(raw, 10);
+          if (!Number.isNaN(lastShownAt)) {
+            const deltaMs = Date.now() - lastShownAt;
+            if (deltaMs < COOLDOWN_MS) return;
+          }
+        }
       } catch {
         // continue and show popup if storage is blocked
       }
@@ -134,13 +140,14 @@ export default function SurveyPopup() {
       setRemaining(AUTO_CLOSE_SECONDS);
       setIsClosing(false);
       setMounted(true);
+      markSeen();
     }, SHOW_DELAY_MS);
 
     return () => {
       window.clearTimeout(showDelay);
       clearTimers();
     };
-  }, [clearTimers]);
+  }, [clearTimers, markSeen]);
 
   useEffect(() => {
     if (!mounted || isClosing) return;

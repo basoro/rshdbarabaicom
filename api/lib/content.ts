@@ -7,7 +7,7 @@ export const heroSlides = [
     description:
       'Pemanfaatan teknologi inovatif untuk meningkatkan kualitas perawatan dan pengalaman pasien.',
     actionLabel: 'Lihat Video',
-    actionUrl: 'https://youtu.be/KTvrVGD0yeo',
+    actionUrl: 'https://youtu.be/-rCv25GeQuQ?si=Q73bh6UiuPRZzogd',
     image:
       'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-01.jpg',
   },
@@ -17,7 +17,7 @@ export const heroSlides = [
     description:
       'Ruang bermain anak yang aman serta area menyusui yang nyaman untuk keluarga pasien.',
     actionLabel: 'Lihat Video',
-    actionUrl: 'https://youtu.be/l-dLJOguwZI',
+    actionUrl: 'https://youtu.be/-rCv25GeQuQ?si=Q73bh6UiuPRZzogd',
     image:
       'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-02.jpg',
   },

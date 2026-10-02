@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Clock3, Menu, Phone, X } from 'lucide-react';
 import type { MenuItem } from '@/types';
@@ -156,9 +156,25 @@ function HeaderMenu({ item }: { item: MenuItem }) {
 
 export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
+
+  const toggleMobileSection = (label: string) => {
+    setOpenMobileSection((prev) => (prev === label ? null : label));
+  };
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
 
   return (
-    <header className="sticky top-0 z-40 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+    <header className="sticky top-0 z-50 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
       <div className="border-b border-slate-100 bg-white text-slate-500">
         <div className="container flex flex-wrap items-center justify-between gap-3 py-2 text-[10.5px] md:text-[11.5px]">
           <div className="flex flex-wrap items-center gap-4">
@@ -186,13 +202,25 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
           </Link>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setMobileOpen((value) => !value)}
-          className="inline-flex rounded-2xl border border-emerald-200 p-3 text-emerald-800 lg:hidden"
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <a
+            href="https://wa.me/628118008080"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Chat WhatsApp RSUD H. Damanhuri Barabai"
+            aria-label="Chat WhatsApp RSUD H. Damanhuri Barabai"
+            className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-[#d84f86]/15 bg-[#fff3f8] text-[#b73567] shadow-[0_6px_16px_-8px_rgba(183,53,103,0.5)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-[#ffe9f1] active:translate-y-0"
+          >
+            <Phone className="h-5 w-5 transition-transform duration-200 ease-out hover:scale-110" />
+          </a>
+          <button
+            type="button"
+            onClick={() => setMobileOpen((value) => !value)}
+            className="inline-flex rounded-2xl border border-emerald-200 p-3 text-emerald-800 lg:hidden"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
 
         <div className="hidden items-center gap-4 lg:flex">
           <div className="rounded-[1.75rem] border border-slate-100 bg-slate-50 px-5 py-2.5">
@@ -240,65 +268,125 @@ export default function SiteHeader({ menu, siteName }: SiteHeaderProps) {
       </div>
 
       {mobileOpen ? (
-        <div className="border-t border-emerald-100 bg-white lg:hidden">
-          <div className="container space-y-3 py-5">
-            {menu.map((item) => (
-              <div key={item.label} className="rounded-3xl border border-slate-200 p-4">
-                {resolveItemUrl(item).startsWith('http') ? (
-                  <a
-                    href={resolveItemUrl(item)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[14px] font-semibold text-slate-900"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {item.label}
-                  </a>
-                ) : (
-                  <Link
-                    to={resolveItemUrl(item)}
-                    className="text-[14px] font-semibold text-slate-900"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                )}
-                {item.children?.length ? (
-                  <div className="mt-3 grid gap-2">
-                    {item.children.map((child) => (
-                      resolveItemUrl(child).startsWith('http') ? (
-                        <a
-                          key={child.label}
-                          href={resolveItemUrl(child)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rounded-2xl bg-slate-50 px-3 py-2 text-[13px] text-slate-600"
-                          onClick={() => setMobileOpen(false)}
+        <div className="fixed inset-0 z-[60] flex flex-col bg-white lg:hidden">
+          <div className="border-b border-emerald-100 bg-white">
+            <div className="container flex items-center justify-end py-3">
+              <button
+                type="button"
+                onClick={() => setMobileOpen(false)}
+                aria-label="Tutup menu"
+                className="inline-flex rounded-2xl border border-emerald-200 p-3 text-emerald-800"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <div className="container space-y-3 py-5">
+              {menu.map((item) => {
+                const hasChildren = !!item.children?.length;
+                const isExpanded = openMobileSection === item.label;
+                const itemUrl = resolveItemUrl(item);
+                const isExternalItem = itemUrl.startsWith('http');
+
+                return (
+                  <div key={item.label} className="rounded-3xl border border-slate-200 p-4">
+                    {hasChildren ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleMobileSection(item.label)}
+                        aria-expanded={isExpanded}
+                        className="flex w-full items-center justify-between text-left text-[14px] font-semibold text-slate-900"
+                      >
+                        <span>{item.label}</span>
+                        <span
+                          className={`ml-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-[15px] font-bold leading-none text-slate-600 transition-transform duration-200 ${
+                            isExpanded ? 'rotate-45' : ''
+                          }`}
+                          aria-hidden="true"
                         >
-                          {child.label}
-                        </a>
-                      ) : (
-                        <Link
-                          key={child.label}
-                          to={resolveItemUrl(child)}
-                          className="rounded-2xl bg-slate-50 px-3 py-2 text-[13px] text-slate-600"
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          {child.label}
-                        </Link>
-                      )
-                    ))}
+                          +
+                        </span>
+                      </button>
+                    ) : isExternalItem ? (
+                      <a
+                        href={itemUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block text-[14px] font-semibold text-slate-900"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        {item.label}
+                      </a>
+                    ) : (
+                      <Link
+                        to={itemUrl}
+                        className="block text-[14px] font-semibold text-slate-900"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        {item.label}
+                      </Link>
+                    )}
+
+                    {hasChildren && isExpanded ? (
+                      <div className="mt-3 grid gap-2">
+                        {item.children!.map((child) => {
+                          const childUrl = resolveItemUrl(child);
+                          const isExternalChild = childUrl.startsWith('http');
+                          return isExternalChild ? (
+                            <a
+                              key={child.label}
+                              href={childUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="rounded-2xl bg-slate-50 px-3 py-2 text-[13px] text-slate-600"
+                              onClick={() => setMobileOpen(false)}
+                            >
+                              {child.label}
+                            </a>
+                          ) : (
+                            <Link
+                              key={child.label}
+                              to={childUrl}
+                              className="rounded-2xl bg-slate-50 px-3 py-2 text-[13px] text-slate-600"
+                              onClick={() => setMobileOpen(false)}
+                            >
+                              {child.label}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ) : null}
                   </div>
-                ) : null}
+                );
+              })}
+
+              <div className="rounded-3xl border border-slate-200 bg-slate-50/60 p-4">
+                <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-800">
+                  <Clock3 className="h-3.5 w-3.5" />
+                  Jam Pelayanan
+                </p>
+                <p className="mt-1 text-[13px] text-slate-600">08:00 - 11:00 • 14:00 - 16:00</p>
               </div>
-            ))}
-            <Link
-              to="/admin/login"
-              className="block rounded-2xl bg-emerald-700 px-4 py-2.5 text-center text-[13px] font-semibold text-white"
-              onClick={() => setMobileOpen(false)}
-            >
-              Buka CMS
-            </Link>
+
+              <a
+                href="https://play.google.com/store/apps/details?id=com.rshdbarabai.apam"
+                target="_blank"
+                rel="noreferrer"
+                className="block rounded-full bg-[#d84f86] px-6 py-3 text-center text-[13px] font-semibold text-white shadow-lg shadow-[#d84f86]/25 transition hover:bg-[#c43d72]"
+                onClick={() => setMobileOpen(false)}
+              >
+                Daftar
+              </a>
+
+              <Link
+                to="/admin/login"
+                className="block rounded-2xl bg-emerald-700 px-4 py-2.5 text-center text-[13px] font-semibold text-white"
+                onClick={() => setMobileOpen(false)}
+              >
+                Buka CMS
+              </Link>
+            </div>
           </div>
         </div>
       ) : null}
