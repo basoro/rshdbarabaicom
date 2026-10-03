@@ -9,7 +9,7 @@ export const heroSlides = [
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/-rCv25GeQuQ?si=Q73bh6UiuPRZzogd',
     image:
-      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-01.jpg',
+      'https://rshdbarabai.com/api/public/media/local/hero/hero-01.jpg',
   },
   {
     eyebrow: 'RSUD H. Damanhuri',
@@ -19,7 +19,7 @@ export const heroSlides = [
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/-rCv25GeQuQ?si=Q73bh6UiuPRZzogd',
     image:
-      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-02.jpg',
+      'https://rshdbarabai.com/api/public/media/local/hero/hero-02.jpg',
   },
   {
     eyebrow: 'RSUD H. Damanhuri',
@@ -29,7 +29,7 @@ export const heroSlides = [
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/YnE-tv47VU8',
     image:
-      'https://rshdbarabai.com/themes/rshd/assets/img/hero/hero-03.jpg',
+      'https://rshdbarabai.com/api/public/media/local/hero/hero-03.jpg',
   },
 ];
 
