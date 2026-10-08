@@ -3,13 +3,43 @@ export const SITE_ORIGIN = 'https://www.rshdbarabai.com';
 export const heroSlides = [
   {
     eyebrow: 'RSUD H. Damanhuri',
+    title: 'RSUD H. DAMANHURI BARABAI',
+    description:
+      'Terwujudnya Pelayanan Prima Menuju Rumah Sakit Terbaik di Kalimantan Selatan.',
+    actionLabel: 'Lihat Video',
+    actionUrl: 'https://youtu.be/-rCv25GeQuQ?si=Q73bh6UiuPRZzogd',
+    image:
+      'https://rshdbarabai.com/api/public/media/local/hero/hero-01.png',
+  },
+  {
+    eyebrow: 'RSUD H. Damanhuri',
+    title: 'Meningkatkan Kualitas Pelayanan Kesehatan',
+    description:
+      'Meningkatkan efektivitas, efisiensi, dan mutu pelayanan kesehatan melalui pengelolaan yang terintegrasi, tepat, dan berorientasi pada kebutuhan pasien.',
+    actionLabel: 'Lihat Video',
+    actionUrl: 'https://youtu.be/-rCv25GeQuQ?si=Q73bh6UiuPRZzogd',
+    image:
+      'https://rshdbarabai.com/api/public/media/local/hero/hero-02.png',
+  },
+  {
+    eyebrow: 'RSUD H. Damanhuri',
+    title: 'Pelayanan Bermutu dengan Teknologi Modern',
+    description:
+      'Didukung oleh peralatan kesehatan modern dan canggih untuk menunjang pelayanan yang cepat, tepat, dan berkualitas demi memberikan pelayanan terbaik.',
+    actionLabel: 'Lihat Video',
+    actionUrl: 'https://youtu.be/-rCv25GeQuQ?si=Q73bh6UiuPRZzogd',
+    image:
+      'https://rshdbarabai.com/api/public/media/local/hero/hero-03.png',
+  },
+  {
+    eyebrow: 'RSUD H. Damanhuri',
     title: 'Smart, Green and Friendly Hospital',
     description:
       'Pemanfaatan teknologi inovatif untuk meningkatkan kualitas perawatan dan pengalaman pasien.',
     actionLabel: 'Lihat Video',
     actionUrl: 'https://youtu.be/-rCv25GeQuQ?si=Q73bh6UiuPRZzogd',
     image:
-      'https://rshdbarabai.com/api/public/media/local/hero/hero-01.jpg',
+      'https://rshdbarabai.com/api/public/media/local/hero/hero-04.png',
   },
   {
     eyebrow: 'RSUD H. Damanhuri',
