@@ -64,10 +64,10 @@ export const heroSlides = [
 ];
 
 export const homeStats = [
-  { label: 'Kamar Inap', value: '274' },
-  { label: 'Paramedis', value: '342' },
-  { label: 'Dokter', value: '40' },
-  { label: 'Tempat Tidur ICU', value: '14' },
+  { label: 'Kamar Inap', value: '429' },
+  { label: 'Paramedis', value: '785' },
+  { label: 'Dokter', value: '104' },
+  { label: 'Tempat Tidur ICU', value: '29' },
 ];
 
 export const featuredServices = [
